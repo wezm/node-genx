@@ -1,0 +1,239 @@
+/*
+Copyright (c) 2011, Wesley Moore http://www.wezm.net/
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+
+    * Neither the name of the node-genx Project, Wesley Moore, nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written
+      permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+#include <node.h>
+#include <node_events.h>
+#include <iostream>
+extern "C" {
+#include "genx.h"
+}
+
+using namespace v8;
+using namespace node;
+using namespace std;
+
+static Persistent<String> sym_data;
+
+class Writer: public EventEmitter
+{
+private:
+  genxWriter writer;
+  genxSender sender;
+  Persistent<Object> stream;
+public:
+
+  static void Initialize(Handle<Object> target)
+  {
+    HandleScope scope;
+
+    Local<FunctionTemplate> t = FunctionTemplate::New(New);
+    t->Inherit(EventEmitter::constructor_template);
+    t->InstanceTemplate()->SetInternalFieldCount(1);
+    t->SetClassName(String::NewSymbol("Writer"));
+
+    NODE_SET_PROTOTYPE_METHOD(t, "startDocument", StartDoc);
+    NODE_SET_PROTOTYPE_METHOD(t, "endDocument", EndDocument);
+
+    NODE_SET_PROTOTYPE_METHOD(t, "startElementLiteral", StartElementLiteral);
+    NODE_SET_PROTOTYPE_METHOD(t, "endElement", EndElement);
+
+    target->Set(String::NewSymbol("Writer"), t->GetFunction());
+
+    sym_data = NODE_PSYMBOL("data");
+  }
+
+  Writer()
+  {
+    // alloc, free, userData
+    writer = genxNew(NULL, NULL, this);
+    sender.send = sender_send;
+    sender.sendBounded = sender_sendBounded;
+    sender.flush = sender_flush;
+    stream = Persistent<Object>::Persistent();
+  }
+
+  ~Writer()
+  {
+    if(!stream.IsEmpty()) stream.Dispose(); // or Clear?
+    genxDispose(writer);
+  }
+
+protected:
+
+  static Handle<Value> New(const Arguments& args)
+  {
+    HandleScope scope;
+    Writer* writer = new Writer();
+    writer->Wrap(args.This());
+    return args.This();
+  }
+
+  static Handle<Value> StartDoc(const Arguments& args)
+  {
+    HandleScope scope;
+    Writer* w = ObjectWrap::Unwrap<Writer>(args.This());
+
+    // if (args.Length() <1 ||
+    //     !args[0]->IsObject()) {
+    //   return ThrowException(Exception::Error(String::New(
+    //     "First argument must be a WriteStream")));
+    // }
+    //
+    // Local<String> sym_writable = String::NewSymbol("writable");
+    //
+    // Local<Object> stream = args[0]->ToObject();
+    // // Check that the argument has the expected properties
+    // if (!stream->Has(String::NewSymbol("write"))) {
+    //   return ThrowException(Exception::Error(String::New(
+    //     "Stream does not have write property")));
+    // }
+    // if (!stream->Has(String::NewSymbol("flush"))) {
+    //   return ThrowException(Exception::Error(String::New(
+    //     "Stream does not have flush property")));
+    // }
+    // if (stream->Has(sym_writable)) {
+    //   Local<Value> writable = stream->Get(sym_writable);
+    //   bool isWritable = writable->BooleanValue();
+    //   if (!isWritable) {
+    //     return ThrowException(Exception::Error(String::New(
+    //       "Stream is not writable")));
+    //   }
+    // }
+    // else {
+    //   return ThrowException(Exception::Error(String::New(
+    //     "Stream does not have writable property")));
+    // }
+
+    w->startDoc();
+
+    return Undefined();
+  }
+
+  genxStatus startDoc()
+  {
+    cout << "startDoc" << endl;
+    return genxStartDocSender(writer, &sender);
+  }
+
+  static Handle<Value> EndDocument(const Arguments& args)
+  {
+    HandleScope scope;
+    Writer* w = ObjectWrap::Unwrap<Writer>(args.This());
+
+    w->endDocument();
+    return Undefined();
+  }
+
+  genxStatus endDocument()
+  {
+    cout << "endDocument" << endl;
+    return genxEndDocument(writer);
+  }
+
+  static Handle<Value> StartElementLiteral(const Arguments& args)
+  {
+    HandleScope scope;
+    Writer* w = ObjectWrap::Unwrap<Writer>(args.This());
+    utf8 type = NULL;
+
+    if (args.Length() <1 ||
+        !args[0]->IsString()) {
+      return ThrowException(Exception::Error(String::New(
+        "First argument must be a String")));
+    }
+
+    Local<String> Type = args[0]->ToString();
+
+    // Get the raw UTF-8 element type
+    int length = Type->Utf8Length();
+    type = new unsigned char[length];
+
+    Type->WriteUtf8((char *)type, length);
+
+    w->startElementLiteral(type);
+    return Undefined();
+  }
+
+  genxStatus startElementLiteral(constUtf8 type)
+  {
+    HandleScope scope;
+    return genxStartElementLiteral(writer, NULL, type);
+  }
+
+  static Handle<Value> EndElement(const Arguments& args)
+  {
+    HandleScope scope;
+    Writer* w = ObjectWrap::Unwrap<Writer>(args.This());
+
+    w->endElement();
+    return Undefined();
+  }
+
+  genxStatus endElement()
+  {
+    cout << "endElement" << endl;
+    return genxEndElement(writer);
+  }
+
+private:
+  static genxStatus sender_send(void * userData, constUtf8 s)
+  {
+    cout << "sender_send: " << s << endl;
+
+    // Deliver the data event
+
+  	return GENX_SUCCESS;
+  }
+
+  static genxStatus sender_sendBounded(void * userData, constUtf8 start, constUtf8 end)
+  {
+    cout << "sender_sendBounded" << endl;
+  	return GENX_SUCCESS;
+  }
+
+  static genxStatus sender_flush(void * userData)
+  {
+    cout << "sender_flush" << endl;
+  	return GENX_SUCCESS;
+  }
+
+};
+
+extern "C" {
+  static void init (Handle<Object> target)
+  {
+    Writer::Initialize(target);
+  }
+
+  NODE_MODULE(genx, init);
+}
