@@ -147,13 +147,45 @@ protected:
     Type->WriteUtf8((char *)type, length);
 
     w->startElementLiteral(type);
-    return Undefined();
+    delete[] type;
+
+    return args.This();
   }
 
   genxStatus startElementLiteral(constUtf8 type)
   {
-    HandleScope scope;
     return genxStartElementLiteral(writer, NULL, type);
+  }
+
+  static Handle<Value> AddText(const Arguments& args)
+  {
+    HandleScope scope;
+    Writer* w = ObjectWrap::Unwrap<Writer>(args.This());
+    utf8 text = NULL;
+    genxStatus status;
+
+    if (args.Length() <1 ||
+        !args[0]->IsString()) {
+      return ThrowException(Exception::Error(String::New(
+        "First argument must be a String")));
+    }
+
+    // Get the raw UTF-8 text
+    Local<String> Text = args[0]->ToString();
+    int length = Text->Utf8Length();
+    text = new unsigned char[length];
+    Text->WriteUtf8((char *)text, length);
+
+    status = w->addText(text);
+    delete[] text;
+
+    return args.This();
+  }
+
+  genxStatus addText(constUtf8 text)
+  {
+    // TODO handle the return value from genx here
+    return genxAddText(writer, text);
   }
 
   static Handle<Value> EndElement(const Arguments& args)
