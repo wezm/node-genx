@@ -67,6 +67,7 @@ public:
     NODE_SET_PROTOTYPE_METHOD(t, "startElementLiteral", StartElementLiteral);
 
     NODE_SET_PROTOTYPE_METHOD(t, "addText", AddText);
+    NODE_SET_PROTOTYPE_METHOD(t, "addAttributeLiteral", AddAttributeLiteral);
 
     NODE_SET_PROTOTYPE_METHOD(t, "endElement", EndElement);
 
@@ -191,6 +192,40 @@ protected:
     return genxAddText(writer, text);
   }
 
+  static Handle<Value> AddAttributeLiteral(const Arguments& args)
+  {
+    HandleScope scope;
+    Writer* w = ObjectWrap::Unwrap<Writer>(args.This());
+    utf8 name = NULL;
+    utf8 value = NULL;
+
+    if (args.Length() < 2    ||
+       !args[0]->IsString() ||
+       !args[1]->IsString()) {
+      return ThrowException(Exception::Error(String::New(
+        "Must supply two string arguments")));
+    }
+
+    Local<String> Name = args[0]->ToString();
+    Local<String> Value = args[1]->ToString();
+
+    // Get the raw UTF-8 strings
+    name = createUtf8FromString(Name);
+    value = createUtf8FromString(Value);
+
+    w->addAttributeLiteral(name, value);
+    delete[] name;
+    delete[] value;
+
+    return args.This();
+  }
+
+  genxStatus addAttributeLiteral(constUtf8 name, constUtf8 value)
+  {
+    constUtf8 xmlns = NULL;
+    return genxAddAttributeLiteral(writer, xmlns, name, value);
+  }
+
   static Handle<Value> EndElement(const Arguments& args)
   {
     HandleScope scope;
@@ -206,6 +241,17 @@ protected:
   }
 
 private:
+  static utf8 createUtf8FromString(Handle<String> String)
+  {
+    utf8 string = NULL;
+    int length = String->Utf8Length();
+
+    string = new unsigned char[length];
+    String->WriteUtf8((char *)string, length);
+
+    return string;
+  }
+
   static genxStatus sender_send(void *userData, constUtf8 s)
   {
     HandleScope scope;
