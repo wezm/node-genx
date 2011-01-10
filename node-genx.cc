@@ -136,7 +136,7 @@ protected:
 
     w->startDoc();
 
-    return Undefined();
+    return args.This();
   }
 
   genxStatus startDoc()
@@ -151,7 +151,7 @@ protected:
     Writer* w = ObjectWrap::Unwrap<Writer>(args.This());
 
     w->endDocument();
-    return Undefined();
+    return args.This();
   }
 
   genxStatus endDocument()
@@ -196,7 +196,7 @@ protected:
     Writer* w = ObjectWrap::Unwrap<Writer>(args.This());
 
     w->endElement();
-    return Undefined();
+    return args.This();
   }
 
   genxStatus endElement()
