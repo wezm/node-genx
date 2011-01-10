@@ -65,6 +65,9 @@ public:
     NODE_SET_PROTOTYPE_METHOD(t, "endDocument", EndDocument);
 
     NODE_SET_PROTOTYPE_METHOD(t, "startElementLiteral", StartElementLiteral);
+
+    NODE_SET_PROTOTYPE_METHOD(t, "addText", AddText);
+
     NODE_SET_PROTOTYPE_METHOD(t, "endElement", EndElement);
 
     target->Set(String::NewSymbol("Writer"), t->GetFunction());
