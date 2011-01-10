@@ -103,45 +103,12 @@ protected:
     HandleScope scope;
     Writer* w = ObjectWrap::Unwrap<Writer>(args.This());
 
-    // if (args.Length() <1 ||
-    //     !args[0]->IsObject()) {
-    //   return ThrowException(Exception::Error(String::New(
-    //     "First argument must be a WriteStream")));
-    // }
-    //
-    // Local<String> sym_writable = String::NewSymbol("writable");
-    //
-    // Local<Object> stream = args[0]->ToObject();
-    // // Check that the argument has the expected properties
-    // if (!stream->Has(String::NewSymbol("write"))) {
-    //   return ThrowException(Exception::Error(String::New(
-    //     "Stream does not have write property")));
-    // }
-    // if (!stream->Has(String::NewSymbol("flush"))) {
-    //   return ThrowException(Exception::Error(String::New(
-    //     "Stream does not have flush property")));
-    // }
-    // if (stream->Has(sym_writable)) {
-    //   Local<Value> writable = stream->Get(sym_writable);
-    //   bool isWritable = writable->BooleanValue();
-    //   if (!isWritable) {
-    //     return ThrowException(Exception::Error(String::New(
-    //       "Stream is not writable")));
-    //   }
-    // }
-    // else {
-    //   return ThrowException(Exception::Error(String::New(
-    //     "Stream does not have writable property")));
-    // }
-
     w->startDoc();
-
     return args.This();
   }
 
   genxStatus startDoc()
   {
-    cout << "startDoc" << endl;
     return genxStartDocSender(writer, &sender);
   }
 
@@ -156,7 +123,6 @@ protected:
 
   genxStatus endDocument()
   {
-    cout << "endDocument" << endl;
     return genxEndDocument(writer);
   }
 
@@ -201,14 +167,12 @@ protected:
 
   genxStatus endElement()
   {
-    cout << "endElement" << endl;
     return genxEndElement(writer);
   }
 
 private:
   static genxStatus sender_send(void * userData, constUtf8 s)
   {
-    cout << "sender_send: " << s << endl;
 
     // Deliver the data event
 
@@ -217,13 +181,11 @@ private:
 
   static genxStatus sender_sendBounded(void * userData, constUtf8 start, constUtf8 end)
   {
-    cout << "sender_sendBounded" << endl;
   	return GENX_SUCCESS;
   }
 
   static genxStatus sender_flush(void * userData)
   {
-    cout << "sender_flush" << endl;
   	return GENX_SUCCESS;
   }
 
