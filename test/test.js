@@ -2,9 +2,18 @@ var genx = require('../build/default/genx');
 
 var w = new genx.Writer();
 
-w.startDocument();
-w.startElementLiteral('genx');
-w.startElementLiteral('test');
-w.endElement();
-w.endElement();
-w.endDocument();
+w.on('data', function(data) {
+  process.stdout.write(data);
+})
+.on('error', function(error) {
+  console.log("error");
+  // Handle the error...
+});
+
+w.startDocument()
+.startElementLiteral('genx')
+  .startElementLiteral('test')
+    .addText("Hello & World")
+  .endElement()
+.endElement()
+.endDocument();
