@@ -203,16 +203,29 @@ protected:
   }
 
 private:
-  static genxStatus sender_send(void * userData, constUtf8 s)
+  static genxStatus sender_send(void *userData, constUtf8 s)
   {
+    HandleScope scope;
+    Writer *w = reinterpret_cast<Writer *>(userData);
 
     // Deliver the data event
+    Local<String> dataString = String::New((const char *)s);
+    Handle<Value> argv[1] = { dataString };
+    w->Emit(sym_data, 1, argv);
 
   	return GENX_SUCCESS;
   }
 
-  static genxStatus sender_sendBounded(void * userData, constUtf8 start, constUtf8 end)
+  static genxStatus sender_sendBounded(void *userData, constUtf8 start, constUtf8 end)
   {
+    HandleScope scope;
+    Writer *w = reinterpret_cast<Writer *>(userData);
+
+    // Deliver the data event
+    Local<String> dataString = String::New((const char *)start, end - start);
+    Handle<Value> argv[1] = { dataString };
+    w->Emit(sym_data, 1, argv);
+
   	return GENX_SUCCESS;
   }
 
