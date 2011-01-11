@@ -8,6 +8,9 @@
  *  permission, see http://www.tbray.org/ongoing/genx/COPYING
  */
 
+#ifndef GENX_H
+#define GENX_H
+
 #include <stdio.h>
 
 #ifdef __cplusplus
@@ -285,3 +288,5 @@ char * genxGetVersion();
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* end of include guard: GENX_H */

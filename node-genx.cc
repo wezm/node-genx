@@ -34,15 +34,52 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <node.h>
 #include <node_events.h>
 #include <iostream>
-extern "C" {
+
 #include "genx.h"
-}
+#include "node-genx.h"
+#include "element.h"
+#include "attribute.h"
 
 using namespace v8;
 using namespace node;
 using namespace std;
 
-static Persistent<String> sym_data;
+static Persistent<String> sym_data; // TODO: I don't think this needs to be global
+Persistent<FunctionTemplate> Element::constructor_template;
+
+void Element::Initialize(Handle<Object> target)
+{
+  HandleScope scope;
+
+  Local<FunctionTemplate> t = FunctionTemplate::New(New);
+
+  constructor_template = Persistent<FunctionTemplate>::New(t);
+  constructor_template->InstanceTemplate()->SetInternalFieldCount(1);
+  constructor_template->SetClassName(String::NewSymbol("Element"));
+}
+
+Element::Element(genxElement el) : element(el)
+{
+}
+
+Element::~Element()
+{
+}
+
+Handle<Value> Element::New(const Arguments& args)
+{
+  HandleScope scope;
+  REQ_EXT_ARG(0, e);
+
+  Element* el = new Element((genxElement)e->Value());
+  el->Wrap(args.This());
+  return args.This();
+}
+
+genxStatus Element::start()
+{
+  return genxStartElement(element);
+}
 
 class Writer: public EventEmitter
 {
@@ -51,7 +88,6 @@ private:
   genxSender sender;
   Persistent<Object> stream;
 public:
-
   static void Initialize(Handle<Object> target)
   {
     HandleScope scope;
@@ -64,10 +100,16 @@ public:
     NODE_SET_PROTOTYPE_METHOD(t, "startDocument", StartDoc);
     NODE_SET_PROTOTYPE_METHOD(t, "endDocument", EndDocument);
 
+    NODE_SET_PROTOTYPE_METHOD(t, "declareElement", DeclareElement);
+
+    NODE_SET_PROTOTYPE_METHOD(t, "startElement", StartElement);
     NODE_SET_PROTOTYPE_METHOD(t, "startElementLiteral", StartElementLiteral);
 
     NODE_SET_PROTOTYPE_METHOD(t, "addText", AddText);
     NODE_SET_PROTOTYPE_METHOD(t, "addComment", AddComment);
+
+    NODE_SET_PROTOTYPE_METHOD(t, "declareAttribute", DeclareAttribute);
+    NODE_SET_PROTOTYPE_METHOD(t, "addAttribute", AddAttribute);
     NODE_SET_PROTOTYPE_METHOD(t, "addAttributeLiteral", AddAttributeLiteral);
 
     NODE_SET_PROTOTYPE_METHOD(t, "endElement", EndElement);
@@ -131,6 +173,51 @@ protected:
     return genxEndDocument(writer);
   }
 
+  static Handle<Value> DeclareElement(const Arguments& args)
+  {
+    HandleScope scope;
+    Writer* w = ObjectWrap::Unwrap<Writer>(args.This());
+    utf8 name = NULL;
+
+    if (args.Length() <1 ||
+        !args[0]->IsString()) {
+      return ThrowException(Exception::Error(String::New(
+        "First argument must be a String")));
+    }
+
+    Local<String> Text = args[0]->ToString();
+    name = createUtf8FromString(Text);
+    
+    Handle<Value> elem = w->declareElement(name);
+    delete[] name;
+    
+    return elem;
+  }
+
+  Handle<Value> declareElement(constUtf8 name)
+  {
+    HandleScope scope;
+    genxStatus status = GENX_SUCCESS;
+    genxNamespace ns = NULL;
+    genxElement element = genxDeclareElement(writer, ns, name, &status);
+
+    Local<Value> argv[1];
+    argv[0] = External::New(element);
+    Persistent<Object> e (Element::constructor_template->GetFunction()->NewInstance(1, argv));
+    // return Undefined();
+    return Persistent<Value>::New(e);
+  }
+
+  static Handle<Value> StartElement(const Arguments& args)
+  {
+    HandleScope scope;
+    Element *e = ObjectWrap::Unwrap<Element>(args[0]->ToObject());
+
+    genxStatus status = e->start(); //genxStartElement(elem);
+
+    return args.This();
+  }
+
   static Handle<Value> StartElementLiteral(const Arguments& args)
   {
     HandleScope scope;
@@ -144,12 +231,7 @@ protected:
     }
 
     Local<String> Type = args[0]->ToString();
-
-    // Get the raw UTF-8 element type
-    int length = Type->Utf8Length();
-    type = new unsigned char[length];
-
-    Type->WriteUtf8((char *)type, length);
+    type = createUtf8FromString(Type);
 
     w->startElementLiteral(type);
     delete[] type;
@@ -218,6 +300,64 @@ protected:
     return genxComment(writer, comment);
   }
 
+  static Handle<Value> DeclareAttribute(const Arguments& args)
+  {
+    HandleScope scope;
+    Writer* w = ObjectWrap::Unwrap<Writer>(args.This());
+    utf8 name = NULL;
+
+    if (args.Length() <1 ||
+        !args[0]->IsString()) {
+      return ThrowException(Exception::Error(String::New(
+        "First argument must be a String")));
+    }
+
+    Local<String> Text = args[0]->ToString();
+    name = createUtf8FromString(Text);
+    
+    Handle<Value> attr = w->declareAttribute(name);
+    delete[] name;
+    
+    return attr;
+  }
+
+  Handle<Value> declareAttribute(constUtf8 name)
+  {
+    HandleScope scope;
+    genxStatus status = GENX_SUCCESS;
+    genxNamespace ns = NULL;
+    genxAttribute attribute = genxDeclareAttribute(writer, ns, name, &status);
+
+    Local<Value> argv[1];
+    argv[0] = External::New(attribute);
+    Persistent<Object> a (Attribute::constructor_template->GetFunction()->NewInstance(1, argv));
+
+    return Persistent<Value>::New(a);
+  }
+
+  static Handle<Value> AddAttribute(const Arguments& args)
+  {
+    HandleScope scope;
+    utf8 value = NULL;
+
+    if (args.Length() < 2    ||
+        !args[0]->IsObject() ||
+        !args[1]->IsString()) {
+      return ThrowException(Exception::Error(String::New(
+        "First argument must be a String")));
+    }
+
+    Attribute *attr = ObjectWrap::Unwrap<Attribute>(args[0]->ToObject());
+    Local<String> Text = args[1]->ToString();
+    value = createUtf8FromString(Text);
+
+    genxStatus status = attr->add(value);
+    delete[] value;
+
+    return args.This();
+  }
+
+
   static Handle<Value> AddAttributeLiteral(const Arguments& args)
   {
     HandleScope scope;
@@ -270,7 +410,7 @@ private:
   static utf8 createUtf8FromString(Handle<String> String)
   {
     utf8 string = NULL;
-    int length = String->Utf8Length();
+    int length = String->Utf8Length() + 1;  // +1 for NUL character
 
     string = new unsigned char[length];
     String->WriteUtf8((char *)string, length);
@@ -315,6 +455,8 @@ extern "C" {
   static void init (Handle<Object> target)
   {
     Writer::Initialize(target);
+    Element::Initialize(target);
+    Attribute::Initialize(target);
   }
 
   NODE_MODULE(genx, init);
