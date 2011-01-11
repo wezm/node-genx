@@ -11,11 +11,13 @@ w.on('data', function(data) {
 });
 
 w.startDocument()
+.addComment(" Generated " + (new Date()).toString() + " ")
 .startElementLiteral('genx')
   .addAttributeLiteral('version', '1.0')
   .startElementLiteral('test')
     .addAttributeLiteral('test', '<&"')
-    .addText("Hello & World")
+    .addText("Hello UTF-8 World: ⚡")
   .endElement()
 .endElement()
 .endDocument();
+process.stdout.write("\n")
