@@ -48,6 +48,7 @@ class Element: ObjectWrap
 {
 private:
   genxElement element;
+
 public:
   static Persistent<FunctionTemplate> constructor_template;
 
@@ -60,25 +61,7 @@ public:
   genxStatus start();
 
 protected:
-
-  // 
-  // Handle<Value> Statement::New(const Arguments& args) {
-  //   HandleScope scope;
-  //   REQ_EXT_ARG(0, stmt);
-  //   int first_rc = args[1]->IntegerValue();
-  //   int mode = args[2]->IntegerValue();
-  // 
-  //   Statement *sto = new Statement((sqlite3_stmt*)stmt->Value(), first_rc, mode);
-  //   sto->Wrap(args.This());
-  //   sto->Ref();
-  // 
-  //   return args.This();
-  // }
-
-
   static Handle<Value> New(const Arguments& args);
-
-
 };
 
 #endif

@@ -187,10 +187,10 @@ protected:
 
     Local<String> Text = args[0]->ToString();
     name = createUtf8FromString(Text);
-    
+
     Handle<Value> elem = w->declareElement(name);
     delete[] name;
-    
+
     return elem;
   }
 
@@ -204,7 +204,7 @@ protected:
     Local<Value> argv[1];
     argv[0] = External::New(element);
     Persistent<Object> e (Element::constructor_template->GetFunction()->NewInstance(1, argv));
-    // return Undefined();
+
     return Persistent<Value>::New(e);
   }
 
@@ -314,10 +314,10 @@ protected:
 
     Local<String> Text = args[0]->ToString();
     name = createUtf8FromString(Text);
-    
+
     Handle<Value> attr = w->declareAttribute(name);
     delete[] name;
-    
+
     return attr;
   }
 
