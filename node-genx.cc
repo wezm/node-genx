@@ -175,11 +175,8 @@ protected:
         "First argument must be a String")));
     }
 
-    // Get the raw UTF-8 text
     Local<String> Text = args[0]->ToString();
-    int length = Text->Utf8Length();
-    text = new unsigned char[length];
-    Text->WriteUtf8((char *)text, length);
+    text = createUtf8FromString(Text);
 
     status = w->addText(text);
     delete[] text;
