@@ -67,6 +67,7 @@ public:
     NODE_SET_PROTOTYPE_METHOD(t, "startElementLiteral", StartElementLiteral);
 
     NODE_SET_PROTOTYPE_METHOD(t, "addText", AddText);
+    NODE_SET_PROTOTYPE_METHOD(t, "addComment", AddComment);
     NODE_SET_PROTOTYPE_METHOD(t, "addAttributeLiteral", AddAttributeLiteral);
 
     NODE_SET_PROTOTYPE_METHOD(t, "endElement", EndElement);
@@ -188,8 +189,36 @@ protected:
 
   genxStatus addText(constUtf8 text)
   {
-    // TODO handle the return value from genx here
+    // TODO handle the return value from genx here?
     return genxAddText(writer, text);
+  }
+
+  static Handle<Value> AddComment(const Arguments& args)
+  {
+    HandleScope scope;
+    Writer* w = ObjectWrap::Unwrap<Writer>(args.This());
+    utf8 text = NULL;
+    genxStatus status;
+
+    if (args.Length() <1 ||
+        !args[0]->IsString()) {
+      return ThrowException(Exception::Error(String::New(
+        "First argument must be a String")));
+    }
+
+    Local<String> Text = args[0]->ToString();
+    text = createUtf8FromString(Text);
+
+    status = w->addComment(text);
+    delete[] text;
+
+    return args.This();
+  }
+
+  genxStatus addComment(constUtf8 comment)
+  {
+    // TODO handle the return value from genx here?
+    return genxComment(writer, comment);
   }
 
   static Handle<Value> AddAttributeLiteral(const Arguments& args)
