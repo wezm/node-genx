@@ -68,9 +68,12 @@ protected:
   static Handle<Value> EndDocument(const Arguments& args);
   genxStatus endDocument();
 
-  static Handle<Value> DeclareElement(const Arguments& args);
-  Handle<Value> declareElement(constUtf8 name);
+  static Handle<Value> DeclareNamespace(const Arguments& args);
+  Handle<Value> declareNamespace(constUtf8 ns, constUtf8 name);
 
+  static Handle<Value> DeclareElement(const Arguments& args);
+  Handle<Value> declareElement(genxNamespace ns, constUtf8 name);
+  
   static Handle<Value> StartElement(const Arguments& args);
   static Handle<Value> StartElementLiteral(const Arguments& args);
   genxStatus startElementLiteral(constUtf8 type);

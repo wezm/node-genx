@@ -31,20 +31,37 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "node-genx.h"
-#include "namespace.h"
-#include "attribute.h"
-#include "element.h"
-#include "writer.h"
+#ifndef NODE_GENX_NAMESPACE_H
+#define NODE_GENX_NAMESPACE_H
 
+#include <v8.h>
+#include <node.h>
 extern "C" {
-  static void init (Handle<Object> target)
-  {
-    Writer::Initialize(target);
-    Namespace::Initialize(target);
-    Attribute::Initialize(target);
-    Element::Initialize(target);
-  }
-
-  NODE_MODULE(genx, init);
+#include "genx.h"
 }
+#include "node-genx.h"
+
+using namespace v8;
+using namespace node;
+
+class Namespace: ObjectWrap
+{
+private:
+  genxNamespace name_space;
+
+public:
+  static Persistent<FunctionTemplate> constructor_template;
+  static void Initialize(Handle<Object> target);
+
+  Namespace(genxNamespace ns);
+  ~Namespace();
+
+  genxNamespace getNamespace();
+
+protected:
+  static Handle<Value> New(const Arguments& args);
+  static Handle<Value> GetPrefix(const Arguments& args);
+  utf8 getPrefix();
+};
+
+#endif

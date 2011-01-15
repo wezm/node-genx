@@ -31,20 +31,61 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <node.h>
+#include <node_events.h>
+#include <iostream>
+
+#include "genx.h"
 #include "node-genx.h"
 #include "namespace.h"
-#include "attribute.h"
-#include "element.h"
-#include "writer.h"
 
-extern "C" {
-  static void init (Handle<Object> target)
-  {
-    Writer::Initialize(target);
-    Namespace::Initialize(target);
-    Attribute::Initialize(target);
-    Element::Initialize(target);
-  }
+using namespace v8;
+using namespace node;
 
-  NODE_MODULE(genx, init);
+Persistent<FunctionTemplate> Namespace::constructor_template;
+
+void Namespace::Initialize(Handle<Object> target)
+{
+  HandleScope scope;
+
+  Local<FunctionTemplate> t = FunctionTemplate::New(New);
+
+  NODE_SET_PROTOTYPE_METHOD(t, "getPrefix", GetPrefix);
+
+  constructor_template = Persistent<FunctionTemplate>::New(t);
+  constructor_template->InstanceTemplate()->SetInternalFieldCount(1);
+  constructor_template->SetClassName(String::NewSymbol("Namespace"));
+}
+
+Namespace::Namespace(genxNamespace ns) : name_space(ns)
+{
+}
+
+Namespace::~Namespace()
+{
+}
+
+Handle<Value> Namespace::New(const Arguments& args)
+{
+  HandleScope scope;
+  REQ_EXT_ARG(0, attr);
+
+  Namespace* a = new Namespace((genxNamespace)attr->Value());
+  a->Wrap(args.This());
+  return args.This();
+}
+
+Handle<Value> Namespace::GetPrefix(const Arguments& args)
+{
+  return Undefined();
+}
+
+utf8 Namespace::getPrefix()
+{
+  return genxGetNamespacePrefix(name_space);
+}
+
+genxNamespace Namespace::getNamespace()
+{
+  return name_space;
 }
