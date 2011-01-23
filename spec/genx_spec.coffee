@@ -7,7 +7,23 @@ describe 'genx', ->
   
     beforeEach ->
       w = new genx.Writer()
-    
+
+    describe 'declareNamespace', ->
+      it 'raises an exception if there is the wrong number of arguments', ->
+        expect(-> w.declareNamespace()).toThrow('Wrong number of arguments to declareNamespace')
+        expect(-> w.declareNamespace(true, true, true)).toThrow('Wrong number of arguments to declareNamespace')
+
+      describe 'with a prefix', ->
+
+        it 'raises an exception if the prefix is not a string', ->
+          expect(-> w.declareNamespace(1, 2)).toThrow('First argument to declareNamespace must be a string')
+
+        it 'raises an exception if the uri is not a string', ->
+          expect(-> w.declareNamespace('prefix', 1)).toThrow('Second argument to declareNamespace must be a string')
+
+      describe 'without a prefix', ->
+
+
     describe 'declareElement', ->
       it 'raises an exception if there is the wrong number of arguments', ->
         expect(-> w.declareElement()).toThrow('Wrong number of arguments to declareElement')

@@ -87,6 +87,7 @@ genxStatus Writer::endDocument()
   return genxEndDocument(writer);
 }
 
+// [prefix], uri
 Handle<Value> Writer::DeclareNamespace(const Arguments& args)
 {
   HandleScope scope;
@@ -102,18 +103,18 @@ Handle<Value> Writer::DeclareNamespace(const Arguments& args)
     case 1:
       if (!args[0]->IsString()) {
         return ThrowException(Exception::TypeError(
-                  String::New("First argument must be a string")));
+                  String::New("First argument to declareNamespace must be a string")));
       }
       Uri = args[0]->ToString();
       break;
     case 2:
       if (!args[0]->IsString()) {
         return ThrowException(Exception::TypeError(
-                  String::New("First argument must be a string")));
+                  String::New("First argument to declareNamespace must be a string")));
       }
       if (!args[1]->IsString()) {
         return ThrowException(Exception::TypeError(
-                  String::New("Second argument must be a string")));
+                  String::New("Second argument to declareNamespace must be a string")));
       }
       Uri = args[0]->ToString();
       Prefix = args[1]->ToString();
@@ -121,7 +122,7 @@ Handle<Value> Writer::DeclareNamespace(const Arguments& args)
       break;
     default:
       return ThrowException(Exception::Error(String::New(
-        "Wrong number of arguments to declareElement")));
+        "Wrong number of arguments to declareNamespace")));
   }
 
   uri = createUtf8FromString(Uri);
