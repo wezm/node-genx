@@ -87,7 +87,7 @@ genxStatus Writer::endDocument()
   return genxEndDocument(writer);
 }
 
-// [prefix], uri
+// uri, [prefix]
 Handle<Value> Writer::DeclareNamespace(const Arguments& args)
 {
   HandleScope scope;
@@ -152,6 +152,7 @@ Handle<Value> Writer::declareNamespace(constUtf8 uri, constUtf8 prefix)
   return Persistent<Value>::New(ns);
 }
 
+// [namespace], elementName
 Handle<Value> Writer::DeclareElement(const Arguments& args)
 {
   HandleScope scope;
@@ -202,6 +203,11 @@ Handle<Value> Writer::declareElement(genxNamespace ns, constUtf8 name)
   HandleScope scope;
   genxStatus status = GENX_SUCCESS;
   genxElement element = genxDeclareElement(writer, ns, name, &status);
+
+  if (status != GENX_SUCCESS) {
+    return ThrowException(Exception::Error(String::New(
+      genxGetErrorMessage(writer, status))));
+  }
 
   Local<Value> argv[1];
   argv[0] = External::New(element);
