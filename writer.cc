@@ -343,16 +343,22 @@ Handle<Value> Writer::AddComment(const Arguments& args)
   Local<String> Text = args[0]->ToString();
   text = createUtf8FromString(Text);
 
-  status = w->addComment(text);
+  Handle<Value> result = w->addComment(text);
   delete[] text;
 
-  return args.This();
+  return result->IsUndefined() ? args.This() : result;
 }
 
-genxStatus Writer::addComment(constUtf8 comment)
+Handle<Value> Writer::addComment(constUtf8 comment)
 {
-  // TODO handle the return value from genx here?
-  return genxComment(writer, comment);
+  genxStatus status = genxComment(writer, comment);
+
+  if (status != GENX_SUCCESS) {
+    return ThrowException(Exception::Error(String::New(
+      genxGetErrorMessage(writer, status))));
+  }
+
+  return Undefined();
 }
 
 // [namespace], name

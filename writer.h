@@ -82,7 +82,7 @@ protected:
   Handle<Value> addText(constUtf8 text);
 
   static Handle<Value> AddComment(const Arguments& args);
-  genxStatus addComment(constUtf8 comment);
+  Handle<Value> addComment(constUtf8 comment);
 
   static Handle<Value> DeclareAttribute(const Arguments& args);
   Handle<Value> declareAttribute(genxNamespace ns, constUtf8 name);
