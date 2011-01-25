@@ -103,15 +103,31 @@ describe 'genx', ->
 
     describe 'addAttributeLiteral', ->
 
-    describe 'declareNamespace', ->
+      beforeEach -> w.startDocument().startElementLiteral('test')
 
-    describe 'declareElement', ->
+      it 'raises an exception if there is the wrong number of arguments', ->
+        expect(-> w.addAttributeLiteral()).toThrow('Two string arguments must be supplied to addAttributeLiteral')
+        expect(-> w.addAttributeLiteral(true, true, true)).toThrow('Two string arguments must be supplied to addAttributeLiteral')
 
-    describe 'declareAttribute', ->
+      it 'raises an exception if the attribute name is invalid', ->
+        expect(-> w.addAttributeLiteral('test=', 'value')).toThrow('Bad NAME')
 
     describe 'startElement', ->
+      elem = null
+
+      beforeEach ->
+        elem = w.declareElement('test')
+        w.startDocument()
+
+      it 'raises an exception if there is the wrong number of arguments', ->
+        expect(-> w.startElement()).toThrow('Argument to startElement must be an Element')
+        expect(-> w.startElement(true, true)).toThrow('Argument to startElement must be an Element')
 
     describe 'addAttribute', ->
+
+    describe 'addText', ->
+
+    describe 'addComment', ->
 
     describe 'generating a document', ->
 

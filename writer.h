@@ -89,7 +89,7 @@ protected:
 
   static Handle<Value> AddAttribute(const Arguments& args);
   static Handle<Value> AddAttributeLiteral(const Arguments& args);
-  genxStatus addAttributeLiteral(constUtf8 name, constUtf8 value);
+  Handle<Value> addAttributeLiteral(constUtf8 name, constUtf8 value);
 
   static Handle<Value> EndElement(const Arguments& args);
   genxStatus endElement();

@@ -219,6 +219,12 @@ Handle<Value> Writer::declareElement(genxNamespace ns, constUtf8 name)
 Handle<Value> Writer::StartElement(const Arguments& args)
 {
   HandleScope scope;
+
+  if (args.Length() < 1 || !args[0]->IsObject()) {
+    return ThrowException(Exception::Error(String::New(
+      "Argument to startElement must be an Element")));
+  }
+
   Element *e = ObjectWrap::Unwrap<Element>(args[0]->ToObject());
 
   // TODO: Handle the return status
@@ -276,12 +282,12 @@ Handle<Value> Writer::StartElementLiteral(const Arguments& args)
 Handle<Value> Writer::startElementLiteral(constUtf8 ns, constUtf8 type)
 {
   genxStatus status = genxStartElementLiteral(writer, ns, type);
-  
+
   if (status != GENX_SUCCESS) {
     return ThrowException(Exception::Error(String::New(
       genxGetErrorMessage(writer, status))));
   }
-  
+
   return Undefined();
 }
 
@@ -439,27 +445,34 @@ Handle<Value> Writer::AddAttributeLiteral(const Arguments& args)
      !args[0]->IsString() ||
      !args[1]->IsString()) {
     return ThrowException(Exception::Error(String::New(
-      "Must supply two string arguments")));
+      "Two string arguments must be supplied to addAttributeLiteral")));
   }
 
   Local<String> Name = args[0]->ToString();
-  Local<String> Value = args[1]->ToString();
+  Local<String> Val = args[1]->ToString();
 
   // Get the raw UTF-8 strings
   name = createUtf8FromString(Name);
-  value = createUtf8FromString(Value);
+  value = createUtf8FromString(Val);
 
-  w->addAttributeLiteral(name, value);
+  Handle<Value> result = w->addAttributeLiteral(name, value);
   delete[] name;
   delete[] value;
 
-  return args.This();
+  return result->IsUndefined() ? args.This() : result;
 }
 
-genxStatus Writer::addAttributeLiteral(constUtf8 name, constUtf8 value)
+Handle<Value> Writer::addAttributeLiteral(constUtf8 name, constUtf8 value)
 {
   constUtf8 xmlns = NULL;
-  return genxAddAttributeLiteral(writer, xmlns, name, value);
+
+  genxStatus status = genxAddAttributeLiteral(writer, xmlns, name, value);
+  if (status != GENX_SUCCESS) {
+    return ThrowException(Exception::Error(String::New(
+      genxGetErrorMessage(writer, status))));
+  }
+
+  return Undefined();
 }
 
 Handle<Value> Writer::EndElement(const Arguments& args)
