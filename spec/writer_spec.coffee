@@ -143,6 +143,14 @@ describe 'genx', ->
 
     describe 'addText', ->
 
+      beforeEach -> w.startDocument().startElementLiteral('test')
+
+      it 'raises an exception if there is the wrong number of arguments', ->
+        expect(-> w.addText()).toThrow('Not enough arguments to addText')
+
+      it 'raises an exception if the argument is not a string', ->
+        expect(-> w.addText(true)).toThrow('Argument to addText must be a string')
+
     describe 'addComment', ->
 
     describe 'generating a document', ->

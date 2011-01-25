@@ -298,10 +298,13 @@ Handle<Value> Writer::AddText(const Arguments& args)
   utf8 text = NULL;
   genxStatus status;
 
-  if (args.Length() <1 ||
-      !args[0]->IsString()) {
+  if (args.Length() < 1) {
     return ThrowException(Exception::Error(String::New(
-      "First argument must be a String")));
+      "Not enough arguments to addText")));
+  }
+  else if(!args[0]->IsString()) {
+    return ThrowException(Exception::TypeError(String::New(
+      "Argument to addText must be a string")));
   }
 
   Local<String> Text = args[0]->ToString();
