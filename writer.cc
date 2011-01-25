@@ -431,6 +431,7 @@ Handle<Value> Writer::declareAttribute(genxNamespace ns, constUtf8 name)
 Handle<Value> Writer::AddAttribute(const Arguments& args)
 {
   HandleScope scope;
+  Writer* w = ObjectWrap::Unwrap<Writer>(args.This());
   utf8 value = NULL;
 
   if (args.Length() < 2) {
@@ -450,12 +451,23 @@ Handle<Value> Writer::AddAttribute(const Arguments& args)
   Local<String> Text = args[1]->ToString();
   value = createUtf8FromString(Text);
 
-  genxStatus status = attr->add(value);
+  Handle<Value> result = w->addAttribute(attr, value);
   delete[] value;
 
-  return args.This();
+  return result->IsUndefined() ? args.This() : result;
 }
 
+Handle<Value> Writer::addAttribute(Attribute *attr, constUtf8 value)
+{
+  genxStatus status = attr->add(value);
+
+  if (status != GENX_SUCCESS) {
+    return ThrowException(Exception::Error(String::New(
+      genxGetErrorMessage(writer, status))));
+  }
+
+  return Undefined();
+}
 
 Handle<Value> Writer::AddAttributeLiteral(const Arguments& args)
 {

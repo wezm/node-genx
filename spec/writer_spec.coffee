@@ -141,6 +141,10 @@ describe 'genx', ->
       it 'raises an exception if the second argument is not a string', ->
         expect(-> w.addAttribute(attr, true)).toThrow('Second argument to addAttribute must be a string')
 
+      it 'raises a sequence error if called in the wrong sequence', ->
+        w.startElementLiteral('test').addText('text')
+        expect(-> w.addAttribute(attr, 'value')).toThrow('Call out of sequence')
+
     describe 'addText', ->
 
       beforeEach -> w.startDocument().startElementLiteral('test')

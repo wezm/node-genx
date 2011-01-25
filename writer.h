@@ -39,6 +39,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "genx.h"
 #include "node-genx.h"
+#include "attribute.h"
 
 using namespace v8;
 using namespace node;
@@ -88,6 +89,8 @@ protected:
   Handle<Value> declareAttribute(genxNamespace ns, constUtf8 name);
 
   static Handle<Value> AddAttribute(const Arguments& args);
+  Handle<Value> addAttribute(Attribute *attr, constUtf8 value);
+
   static Handle<Value> AddAttributeLiteral(const Arguments& args);
   Handle<Value> addAttributeLiteral(constUtf8 name, constUtf8 value);
 
