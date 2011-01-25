@@ -334,10 +334,13 @@ Handle<Value> Writer::AddComment(const Arguments& args)
   utf8 text = NULL;
   genxStatus status;
 
-  if (args.Length() <1 ||
-      !args[0]->IsString()) {
+  if (args.Length() < 1) {
     return ThrowException(Exception::Error(String::New(
-      "First argument must be a String")));
+      "Not enough arguments to addComment")));
+  }
+  else if(!args[0]->IsString()) {
+    return ThrowException(Exception::TypeError(String::New(
+      "Argument to addComment must be a string")));
   }
 
   Local<String> Text = args[0]->ToString();

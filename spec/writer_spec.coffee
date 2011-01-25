@@ -153,6 +153,14 @@ describe 'genx', ->
 
     describe 'addComment', ->
 
+      beforeEach -> w.startDocument()
+
+      it 'raises an exception if there is the wrong number of arguments', ->
+        expect(-> w.addComment()).toThrow('Not enough arguments to addComment')
+
+      it 'raises an exception if the argument is not a string', ->
+        expect(-> w.addComment(true)).toThrow('Argument to addComment must be a string')
+
     describe 'generating a document', ->
 
       describe 'using literal nodes', ->
