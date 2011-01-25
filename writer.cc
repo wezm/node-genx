@@ -348,7 +348,6 @@ Handle<Value> Writer::AddComment(const Arguments& args)
   HandleScope scope;
   Writer* w = ObjectWrap::Unwrap<Writer>(args.This());
   utf8 text = NULL;
-  genxStatus status;
 
   if (args.Length() < 1) {
     return ThrowException(Exception::Error(String::New(
