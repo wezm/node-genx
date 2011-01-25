@@ -213,8 +213,30 @@ describe 'genx', ->
           )
 
 
-        describe 'using a mix of literal and declared nodes', ->
+      describe 'using a mix of literal and declared nodes', ->
 
-    describe 're-using a writer', ->
+        it 'generates the correct XML', ->
+          result = ''
+          w.on 'data', (data) -> result += data
+
+          uri = 'http://www.w3.org/2005/Atom'
+          ns = w.declareNamespace(uri, '')
+          feed = w.declareElement(ns, 'feed')
+          type = w.declareAttribute('type')
+
+          w.startDocument()
+            .startElement(feed)
+              .startElementLiteral(uri, 'title')
+                .addAttribute(type, 'text')
+                .addText('Testing')
+              .endElement()
+            .endElement()
+          .endDocument()
+
+          expect(result).toEqual(
+            """<feed xmlns="http://www.w3.org/2005/Atom"><title type="text">Testing</title></feed>"""
+          )
+
+    describe 'generating multiple documents', ->
 
 
