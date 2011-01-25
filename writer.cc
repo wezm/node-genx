@@ -227,30 +227,62 @@ Handle<Value> Writer::StartElement(const Arguments& args)
   return args.This();
 }
 
+// [namespace], type
 Handle<Value> Writer::StartElementLiteral(const Arguments& args)
 {
   HandleScope scope;
   Writer* w = ObjectWrap::Unwrap<Writer>(args.This());
-  utf8 type = NULL;
+  Local<String> Namespace;
+  Local<String> Type;
 
-  if (args.Length() <1 ||
-      !args[0]->IsString()) {
-    return ThrowException(Exception::Error(String::New(
-      "First argument must be a String")));
+  utf8 type = NULL;
+  utf8 name_space = NULL;
+
+  // Namespace is optional
+  switch(args.Length()) {
+    case 1:
+      if (!args[0]->IsString()) {
+        return ThrowException(Exception::TypeError(
+                  String::New("First argument must be a string")));
+      }
+      Type = args[0]->ToString();
+      break;
+    case 2:
+      if (!args[0]->IsString()) {
+        return ThrowException(Exception::TypeError(
+                  String::New("First argument must a string")));
+      }
+      if (!args[1]->IsString()) {
+        return ThrowException(Exception::TypeError(
+                  String::New("Second argument must be a string")));
+      }
+      Namespace = args[0]->ToString();
+      name_space = createUtf8FromString(Namespace);
+      Type = args[1]->ToString();
+      break;
+    default:
+      return ThrowException(Exception::Error(String::New(
+        "Wrong number of arguments to startElementLiteral")));
   }
 
-  Local<String> Type = args[0]->ToString();
   type = createUtf8FromString(Type);
 
-  w->startElementLiteral(type);
+  Handle<Value> result = w->startElementLiteral(name_space, type);
   delete[] type;
 
-  return args.This();
+  return result->IsUndefined() ? args.This() : result;
 }
 
-genxStatus Writer::startElementLiteral(constUtf8 type)
+Handle<Value> Writer::startElementLiteral(constUtf8 ns, constUtf8 type)
 {
-  return genxStartElementLiteral(writer, NULL, type);
+  genxStatus status = genxStartElementLiteral(writer, ns, type);
+  
+  if (status != GENX_SUCCESS) {
+    return ThrowException(Exception::Error(String::New(
+      genxGetErrorMessage(writer, status))));
+  }
+  
+  return Undefined();
 }
 
 Handle<Value> Writer::AddText(const Arguments& args)

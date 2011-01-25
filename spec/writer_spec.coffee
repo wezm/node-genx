@@ -51,7 +51,7 @@ describe 'genx', ->
         it 'raises an exception if it isn\'t a string', ->
           expect(-> w.declareElement(1)).toThrow('First argument must be a string')
 
-        # FIXME: this doesn't really test as per the description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+        # FIXME: this doesn't really test as per the description
         it 'returns an Element object', ->
           expect(w.declareElement 'test').toBeDefined()
 
@@ -77,7 +77,7 @@ describe 'genx', ->
         it 'raises an exception if it isn\'t a string', ->
           expect(-> w.declareAttribute(1)).toThrow('First argument must be a string')
 
-        # FIXME: this doesn't really test as per the description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+        # FIXME: this doesn't really test as per the description
         it 'returns an Attribute object', ->
           expect(w.declareAttribute 'test').toBeDefined()
 
@@ -87,6 +87,82 @@ describe 'genx', ->
         beforeEach ->
           ns = w.declareNamespace('test')
 
-        it 'returns an Attrubute object', ->
+        it 'returns an Attribute object', ->
           expect(w.declareAttribute ns, 'attr').toBeDefined()
-      
+
+    describe 'startElementLiteral', ->
+
+      beforeEach -> w.startDocument()
+
+      it 'raises an exception if there is the wrong number of arguments', ->
+        expect(-> w.startElementLiteral()).toThrow('Wrong number of arguments to startElementLiteral')
+        expect(-> w.startElementLiteral(true, true, true)).toThrow('Wrong number of arguments to startElementLiteral')
+
+      it 'raises an exception if the element name is invalid', ->
+        expect(-> w.startElementLiteral('test>')).toThrow('Bad NAME')
+
+    describe 'addAttributeLiteral', ->
+
+    describe 'declareNamespace', ->
+
+    describe 'declareElement', ->
+
+    describe 'declareAttribute', ->
+
+    describe 'startElement', ->
+
+    describe 'addAttribute', ->
+
+    describe 'generating a document', ->
+
+      describe 'using literal nodes', ->
+
+        it 'generates the correct XML', ->
+          result = ''
+          w.on 'data', (data) -> result += data
+
+          w.startDocument()
+            .addComment(' Testing ')
+            .startElementLiteral('http://www.w3.org/2005/Atom', 'feed')
+              .startElementLiteral('title')
+                .addAttributeLiteral('type', 'text')
+                .addText('Testing')
+              .endElement()
+            .endElement()
+          .endDocument()
+
+          expect(result).toEqual(
+            """<!-- Testing -->
+               <g1:feed xmlns:g1="http://www.w3.org/2005/Atom"><title type="text">Testing</title></g1:feed>"""
+          )
+
+      describe 'using pre-declared nodes', ->
+
+        it 'generates the correct XML', ->
+          result = ''
+          w.on 'data', (data) -> result += data
+
+          ns = w.declareNamespace('http://www.w3.org/2005/Atom', '')
+          feed = w.declareElement(ns, 'feed')
+          title = w.declareElement(ns, 'title')
+          type = w.declareAttribute('type')
+
+          w.startDocument()
+            .startElement(feed)
+              .startElement(title)
+                .addAttribute(type, 'text')
+                .addText('Testing')
+              .endElement()
+            .endElement()
+          .endDocument()
+
+          expect(result).toEqual(
+            """<feed xmlns="http://www.w3.org/2005/Atom"><title type="text">Testing</title></feed>"""
+          )
+
+
+        describe 'using a mix of literal and declared nodes', ->
+
+    describe 're-using a writer', ->
+
+

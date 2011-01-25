@@ -76,7 +76,7 @@ protected:
   
   static Handle<Value> StartElement(const Arguments& args);
   static Handle<Value> StartElementLiteral(const Arguments& args);
-  genxStatus startElementLiteral(constUtf8 type);
+  Handle<Value> startElementLiteral(constUtf8 ns, constUtf8 type);
 
   static Handle<Value> AddText(const Arguments& args);
   genxStatus addText(constUtf8 text);
