@@ -243,6 +243,22 @@ describe 'genx', ->
             """<feed xmlns="http://www.w3.org/2005/Atom"><title type="text">Testing</title></feed>"""
           )
 
-    describe 'generating multiple documents', ->
+    it 'can generate multiple documents', ->
+      result = ''
+      w.on 'data', (data) -> result += data
 
+      w.startDocument()
+        .startElementLiteral('doc1')
+        .endElement()
+      .endDocument()
 
+      result += "\n"
+
+      w.startDocument()
+        .startElementLiteral('doc2')
+        .endElement()
+      .endDocument()
+
+      expect(result).toEqual(
+        "<doc1></doc1>\n<doc2></doc2>"
+      )
