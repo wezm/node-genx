@@ -296,7 +296,6 @@ Handle<Value> Writer::AddText(const Arguments& args)
   HandleScope scope;
   Writer* w = ObjectWrap::Unwrap<Writer>(args.This());
   utf8 text = NULL;
-  genxStatus status;
 
   if (args.Length() < 1) {
     return ThrowException(Exception::Error(String::New(
@@ -310,16 +309,22 @@ Handle<Value> Writer::AddText(const Arguments& args)
   Local<String> Text = args[0]->ToString();
   text = createUtf8FromString(Text);
 
-  status = w->addText(text);
+  Handle<Value> result = w->addText(text);
   delete[] text;
 
-  return args.This();
+  return result->IsUndefined() ? args.This() : result;
 }
 
-genxStatus Writer::addText(constUtf8 text)
+Handle<Value> Writer::addText(constUtf8 text)
 {
-  // TODO handle the return value from genx here?
-  return genxAddText(writer, text);
+  genxStatus status = genxAddText(writer, text);
+
+  if (status != GENX_SUCCESS) {
+    return ThrowException(Exception::Error(String::New(
+      genxGetErrorMessage(writer, status))));
+  }
+
+  return Undefined();
 }
 
 Handle<Value> Writer::AddComment(const Arguments& args)
