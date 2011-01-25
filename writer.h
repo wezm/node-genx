@@ -40,6 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "genx.h"
 #include "node-genx.h"
 #include "attribute.h"
+#include "element.h"
 
 using namespace v8;
 using namespace node;
@@ -76,6 +77,7 @@ protected:
   Handle<Value> declareElement(genxNamespace ns, constUtf8 name);
   
   static Handle<Value> StartElement(const Arguments& args);
+  Handle<Value> startElement(Element *elem);
   static Handle<Value> StartElementLiteral(const Arguments& args);
   Handle<Value> startElementLiteral(constUtf8 ns, constUtf8 type);
 
@@ -90,7 +92,6 @@ protected:
 
   static Handle<Value> AddAttribute(const Arguments& args);
   Handle<Value> addAttribute(Attribute *attr, constUtf8 value);
-
   static Handle<Value> AddAttributeLiteral(const Arguments& args);
   Handle<Value> addAttributeLiteral(constUtf8 name, constUtf8 value);
 

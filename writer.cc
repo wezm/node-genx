@@ -219,6 +219,7 @@ Handle<Value> Writer::declareElement(genxNamespace ns, constUtf8 name)
 Handle<Value> Writer::StartElement(const Arguments& args)
 {
   HandleScope scope;
+  Writer* w = ObjectWrap::Unwrap<Writer>(args.This());
 
   if (args.Length() < 1) {
     return ThrowException(Exception::Error(
@@ -231,10 +232,21 @@ Handle<Value> Writer::StartElement(const Arguments& args)
 
   Element *e = ObjectWrap::Unwrap<Element>(args[0]->ToObject());
 
-  // TODO: Handle the return status
-  genxStatus status = e->start();
+  Handle<Value> result = w->startElement(e);
 
-  return args.This();
+  return result->IsUndefined() ? args.This() : result;
+}
+
+Handle<Value> Writer::startElement(Element *elem)
+{
+  genxStatus status = elem->start();
+
+  if (status != GENX_SUCCESS) {
+    return ThrowException(Exception::Error(String::New(
+      genxGetErrorMessage(writer, status))));
+  }
+
+  return Undefined();
 }
 
 // [namespace], type

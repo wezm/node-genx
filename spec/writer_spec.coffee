@@ -117,13 +117,17 @@ describe 'genx', ->
 
       beforeEach ->
         elem = w.declareElement 'test'
-        w.startDocument()
 
       it 'raises an exception if there is the wrong number of arguments', ->
+        w.startDocument()
         expect(-> w.startElement()).toThrow('Not enough arguments to startElement')
 
       it 'raises an exception if the first argument is not an Element', ->
+        w.startDocument()
         expect(-> w.startElement('elem')).toThrow('Argument to startElement must be an Element')
+
+      it 'handles errors (by raising them) from genx', ->
+        expect(-> w.startElement(elem)).toThrow('Call out of sequence')
 
     describe 'addAttribute', ->
       attr = null
