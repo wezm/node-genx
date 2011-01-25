@@ -51,6 +51,7 @@ describe 'genx', ->
         it 'raises an exception if it isn\'t a string', ->
           expect(-> w.declareElement(1)).toThrow('First argument must be a string')
 
+        # FIXME: this doesn't really test as per the description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
         it 'returns an Element object', ->
           expect(w.declareElement 'test').toBeDefined()
 
@@ -62,3 +63,30 @@ describe 'genx', ->
 
         it 'returns an Element object', ->
           expect(w.declareElement ns, 'test').toBeDefined()
+
+    describe 'declareAttribute', ->
+      it 'raises an exception if there is the wrong number of arguments', ->
+        expect(-> w.declareAttribute()).toThrow('Wrong number of arguments to declareAttribute')
+        expect(-> w.declareAttribute(true, true, true)).toThrow('Wrong number of arguments to declareAttribute')
+
+      it 'raises an exception if the attribute name is invalid', ->
+        expect(-> w.declareElement('test=')).toThrow('Bad NAME')
+
+      describe 'without a namespace', ->
+
+        it 'raises an exception if it isn\'t a string', ->
+          expect(-> w.declareAttribute(1)).toThrow('First argument must be a string')
+
+        # FIXME: this doesn't really test as per the description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+        it 'returns an Attribute object', ->
+          expect(w.declareAttribute 'test').toBeDefined()
+
+      describe 'with a namespace', ->
+        ns = null
+
+        beforeEach ->
+          ns = w.declareNamespace('test')
+
+        it 'returns an Attrubute object', ->
+          expect(w.declareAttribute ns, 'attr').toBeDefined()
+      

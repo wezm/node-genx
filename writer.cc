@@ -221,7 +221,8 @@ Handle<Value> Writer::StartElement(const Arguments& args)
   HandleScope scope;
   Element *e = ObjectWrap::Unwrap<Element>(args[0]->ToObject());
 
-  genxStatus status = e->start(); //genxStartElement(elem);
+  // TODO: Handle the return status
+  genxStatus status = e->start();
 
   return args.This();
 }
@@ -308,33 +309,62 @@ genxStatus Writer::addComment(constUtf8 comment)
   return genxComment(writer, comment);
 }
 
+// [namespace], name
 Handle<Value> Writer::DeclareAttribute(const Arguments& args)
 {
   HandleScope scope;
   Writer* w = ObjectWrap::Unwrap<Writer>(args.This());
-  utf8 name = NULL;
+  Namespace *name_space = NULL;
+  Local<String> Text;
 
-  if (args.Length() <1 ||
-      !args[0]->IsString()) {
-    return ThrowException(Exception::Error(String::New(
-      "First argument must be a String")));
+  utf8 name = NULL;
+  genxNamespace ns = NULL;
+
+  // Namespace is optional
+  switch(args.Length()) {
+    case 1:
+      if (!args[0]->IsString()) {
+        return ThrowException(Exception::TypeError(
+                  String::New("First argument must be a string")));
+      }
+      Text = args[0]->ToString();
+      break;
+    case 2:
+      if (!args[0]->IsObject()) {
+        return ThrowException(Exception::TypeError(
+                  String::New("First argument must a Namespace")));
+      }
+      if (!args[1]->IsString()) {
+        return ThrowException(Exception::TypeError(
+                  String::New("Second argument must be a string")));
+      }
+      name_space = ObjectWrap::Unwrap<Namespace>(args[0]->ToObject());
+      Text = args[1]->ToString();
+      break;
+    default:
+      return ThrowException(Exception::Error(String::New(
+        "Wrong number of arguments to declareAttribute")));
   }
 
-  Local<String> Text = args[0]->ToString();
   name = createUtf8FromString(Text);
+  if (name_space != NULL) ns = name_space->getNamespace();
 
-  Handle<Value> attr = w->declareAttribute(name);
+  Handle<Value> attr = w->declareAttribute(ns, name);
   delete[] name;
 
   return attr;
 }
 
-Handle<Value> Writer::declareAttribute(constUtf8 name)
+Handle<Value> Writer::declareAttribute(genxNamespace ns, constUtf8 name)
 {
   HandleScope scope;
   genxStatus status = GENX_SUCCESS;
-  genxNamespace ns = NULL;
   genxAttribute attribute = genxDeclareAttribute(writer, ns, name, &status);
+
+  if (status != GENX_SUCCESS) {
+    return ThrowException(Exception::Error(String::New(
+      genxGetErrorMessage(writer, status))));
+  }
 
   Local<Value> argv[1];
   argv[0] = External::New(attribute);
