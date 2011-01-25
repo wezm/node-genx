@@ -116,7 +116,7 @@ describe 'genx', ->
       elem = null
 
       beforeEach ->
-        elem = w.declareElement('test')
+        elem = w.declareElement 'test'
         w.startDocument()
 
       it 'raises an exception if there is the wrong number of arguments', ->
@@ -124,6 +124,22 @@ describe 'genx', ->
         expect(-> w.startElement(true, true)).toThrow('Argument to startElement must be an Element')
 
     describe 'addAttribute', ->
+      attr = null
+
+      beforeEach ->
+        attr = w.declareAttribute 'attr'
+        w.startDocument()
+
+      it 'raises an exception if there is the wrong number of arguments', ->
+        w.startElementLiteral 'test'
+        expect(-> w.addAttribute()).toThrow('Wrong number of arguments to addAttribute')
+        expect(-> w.addAttribute(attr)).toThrow('Wrong number of arguments to addAttribute')
+
+      it 'raises an exception if the first argument is not an Attribute', ->
+        expect(-> w.addAttribute(true, 'value')).toThrow('First argument to addAttribute must be an Attribute')
+
+      it 'raises an exception if the second argument is not a string', ->
+        expect(-> w.addAttribute(attr, true)).toThrow('Second argument to addAttribute must be a string')
 
     describe 'addText', ->
 

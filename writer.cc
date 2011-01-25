@@ -416,11 +416,17 @@ Handle<Value> Writer::AddAttribute(const Arguments& args)
   HandleScope scope;
   utf8 value = NULL;
 
-  if (args.Length() < 2    ||
-      !args[0]->IsObject() ||
-      !args[1]->IsString()) {
-    return ThrowException(Exception::Error(String::New(
-      "First argument must be a String")));
+  if (args.Length() < 2) {
+    return ThrowException(Exception::Error(
+              String::New("Wrong number of arguments to addAttribute")));
+  }
+  else if(!args[0]->IsObject()) {
+    return ThrowException(Exception::TypeError(
+              String::New("First argument to addAttribute must be an Attribute")));
+  }
+  else if(!args[1]->IsString()) {
+    return ThrowException(Exception::TypeError(
+              String::New("Second argument to addAttribute must be a string")));
   }
 
   Attribute *attr = ObjectWrap::Unwrap<Attribute>(args[0]->ToObject());
