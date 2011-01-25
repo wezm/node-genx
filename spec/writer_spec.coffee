@@ -120,8 +120,10 @@ describe 'genx', ->
         w.startDocument()
 
       it 'raises an exception if there is the wrong number of arguments', ->
-        expect(-> w.startElement()).toThrow('Argument to startElement must be an Element')
-        expect(-> w.startElement(true, true)).toThrow('Argument to startElement must be an Element')
+        expect(-> w.startElement()).toThrow('Not enough arguments to startElement')
+
+      it 'raises an exception if the first argument is not an Element', ->
+        expect(-> w.startElement('elem')).toThrow('Argument to startElement must be an Element')
 
     describe 'addAttribute', ->
       attr = null

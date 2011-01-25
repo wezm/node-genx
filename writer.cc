@@ -220,9 +220,13 @@ Handle<Value> Writer::StartElement(const Arguments& args)
 {
   HandleScope scope;
 
-  if (args.Length() < 1 || !args[0]->IsObject()) {
-    return ThrowException(Exception::Error(String::New(
-      "Argument to startElement must be an Element")));
+  if (args.Length() < 1) {
+    return ThrowException(Exception::Error(
+              String::New("Not enough arguments to startElement")));
+  }
+  else if(!args[0]->IsObject()) {
+    return ThrowException(Exception::TypeError(
+              String::New("Argument to startElement must be an Element")));
   }
 
   Element *e = ObjectWrap::Unwrap<Element>(args[0]->ToObject());
