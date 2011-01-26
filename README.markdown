@@ -424,6 +424,8 @@ The suite is run by running `jasbin` in the project root:
     # Finished in 0.032 seconds
     # 21 tests, 41 assertions, 0 failures
 
+The suite should pass on node 0.2.x and 0.3.x.
+
 There is also a Guardfile present that enables automatically rebuilding the
 module and running the tests when one of the source files change. To use this
 you need the `guard` and `guard-shell` Ruby gems installed. This can be done as
