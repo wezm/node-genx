@@ -1,4 +1,3 @@
-#include <element.h>
 /*
 Copyright (c) 2011, Wesley Moore http://www.wezm.net/
 All rights reserved.
@@ -32,6 +31,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include "element.h"
 
 Persistent<FunctionTemplate> Element::constructor_template;
 
