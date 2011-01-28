@@ -79,6 +79,8 @@ To run the example and format it with `xmllint`:
 
     node genx-atom.js | xmllint --format -
 
+For more examples see, [Generating XML With node.js](http://www.wezm.net/technical/2011/01/generating-xml-with-node-js/).
+
 API
 ---
 
