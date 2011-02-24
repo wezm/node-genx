@@ -436,3 +436,8 @@ follows:
 
 Then run `guard` in the project root.
 
+Changelog
+---------
+
+* 0.8.2 -- 25 Feb 2011
+  * Fix trailing comma in package.json
