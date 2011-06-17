@@ -75,12 +75,10 @@ Writer::Writer()
   sender.send = sender_send;
   sender.sendBounded = sender_sendBounded;
   sender.flush = sender_flush;
-  stream = Persistent<Object>::Persistent();
 }
 
 Writer::~Writer()
 {
-  if(!stream.IsEmpty()) stream.Dispose(); // or Clear?
   genxDispose(writer);
 }
 

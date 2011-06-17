@@ -52,7 +52,6 @@ class Writer: public EventEmitter
 private:
   genxWriter writer;
   genxSender sender;
-  Persistent<Object> stream;
 public:
   static void Initialize(Handle<Object> target);
 
