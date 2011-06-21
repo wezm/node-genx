@@ -9,4 +9,4 @@ def build(bld):
   obj = bld.new_task_gen("cxx", "shlib", "node_addon")
   obj.cxxflags = ["-g", "-D_FILE_OFFSET_BITS=64", "-D_LARGEFILE_SOURCE", "-Wall"]
   obj.target = "genx"
-  obj.source = "src/charProps.c src/genx.c src/namespace.cc src/element.cc src/attribute.cc src/writer.cc src/node-genx.cc"
+  obj.source = "src/charProps.cc src/genx.cc src/namespace.cc src/element.cc src/attribute.cc src/writer.cc src/node-genx.cc"
