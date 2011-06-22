@@ -436,8 +436,16 @@ follows:
 
 Then run `guard` in the project root.
 
+Contributors
+------------
+
+* Morten Siebuhr -- https://github.com/msiebuhr
+  * Applied fix for node-waf configuration errors on Linux
+
 Changelog
 ---------
 
+* 0.8.3 -- 22 Jun 2001
+  * Fix build issues on Linux
 * 0.8.2 -- 25 Feb 2011
   * Fix trailing comma in package.json
