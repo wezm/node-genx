@@ -35,7 +35,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define NODE_GENX_WRITER_H
 
 #include <node.h>
-#include <node_events.h>
 
 #include "genx.h"
 #include "node-genx.h"
@@ -47,7 +46,7 @@ using namespace node;
 
 static Persistent<String> sym_data; // TODO: I don't think this needs to be global
 
-class Writer: public EventEmitter
+class Writer: public ObjectWrap
 {
 private:
   genxWriter writer;
@@ -62,6 +61,7 @@ public:
 protected:
 
   static Handle<Value> New(const Arguments& args);
+  void setUserData(void *userData);
 
   static Handle<Value> StartDoc(const Arguments& args);
   genxStatus startDoc();
