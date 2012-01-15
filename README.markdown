@@ -15,8 +15,7 @@ Installing
 Building From Source
 --------------------
 
-    node-waf configure
-    node-waf build
+    node-waf configure build
 
 Example
 -------
@@ -85,7 +84,7 @@ API
 ---
 
 The API pretty closely follows the underlying [Genx library's API][libapi].
-This module exports one object, `Writer`, which you use to generate XML.  Any
+This module exports one object, `Writer`, which you use to generate XML. Any
 errors encountered are raised as exceptions.
 
 [libapi]: http://www.tbray.org/ongoing/genx/docs/Guide.html
@@ -407,30 +406,29 @@ Returns the receiver.
 Running the Tests
 -----------------
 
-This project has a test suite in the `spec` directory. It is written in
-CoffeeScript and utilises the [Jasmine][jasmine] BDD framwork.  To run the
-suite you need to have the jasbin and coffee-script modules installed:
+This project has a test suite in the `test` directory. It utilises the
+[Mocha][mocha] test framework. To run the suite you need to have the
+`mocha` and `should` modules installed:
 
-    npm install jasbin coffee-script
+    npm install -g mocha
+    npm install should
 
-[jasmine]: http://pivotal.github.com/jasmine/
+[mocha]: http://visionmedia.github.com/mocha/
 
-The suite is run by running `jasbin` in the project root:
+The suite is run by running `mocha` in the project root:
 
-    jasbin
+    % mocha
 
-    # Started
-    # ...................................
-    #
-    # Finished in 0.032 seconds
-    # 21 tests, 41 assertions, 0 failures
+      ...................................
 
-The suite should pass on node 0.2.x and 0.3.x.
+      ✔ 35 tests complete (24ms)
 
-There is also a Guardfile present that enables automatically rebuilding the
-module and running the tests when one of the source files change. To use this
-you need the `guard` and `guard-shell` Ruby gems installed. This can be done as
-follows:
+This version of `node-genx` has only been tested on node 0.6.x.
+
+There is also a Guardfile present that enables automatically rebuilding
+the module and running the tests when one of the source files
+change. To use this you need the `guard` and `guard-shell` Ruby gems
+installed. This can be done as follows:
 
     gem install guard guard-shell
 
@@ -445,7 +443,9 @@ Contributors
 Changelog
 ---------
 
-* 0.8.3 -- 22 Jun 2001
+* 0.9.0 -- 31 Jan 2012
+  * Update to support node 0.6.x
+* 0.8.3 -- 22 Jun 2011
   * Fix build issues on Linux
 * 0.8.2 -- 25 Feb 2011
   * Fix trailing comma in package.json
