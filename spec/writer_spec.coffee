@@ -1,4 +1,4 @@
-genx = require '../build/default/genx'
+genx = require '../lib/genx'
 
 describe 'genx', ->
 
