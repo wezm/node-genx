@@ -45,8 +45,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace v8;
 using namespace node;
 
-static Persistent<String> sym_data; // TODO: I don't think this needs to be global
-
 class Writer: public ObjectWrap
 {
 private:
