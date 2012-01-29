@@ -43,6 +43,7 @@ void Writer::Initialize(Handle<Object> target)
   HandleScope scope;
 
   Local<FunctionTemplate> t = FunctionTemplate::New(New);
+  t->Inherit(EventEmitter::constructor_template);
   t->InstanceTemplate()->SetInternalFieldCount(1);
   t->SetClassName(String::NewSymbol("Writer"));
 
@@ -73,7 +74,7 @@ void Writer::Initialize(Handle<Object> target)
 Writer::Writer()
 {
   // alloc, free, userData
-  writer = genxNew(NULL, NULL, NULL);
+  writer = genxNew(NULL, NULL, this);
   sender.send = sender_send;
   sender.sendBounded = sender_sendBounded;
   sender.flush = sender_flush;
@@ -89,13 +90,7 @@ Handle<Value> Writer::New(const Arguments& args)
   HandleScope scope;
   Writer* writer = new Writer();
   writer->Wrap(args.This());
-  writer->setUserData(handle_)
   return args.This();
-}
-
-void Writer::setUserData(void *userData)
-{
-  genxSetUserData(writer, useData)
 }
 
 Handle<Value> Writer::StartDoc(const Arguments& args)
@@ -593,27 +588,11 @@ genxStatus Writer::sender_send(void *userData, constUtf8 s)
 {
   HandleScope scope;
   Writer *w = reinterpret_cast<Writer *>(userData);
-  Local<String> dataString = String::New((const char *)s);
 
   // Deliver the data event
-
-  // Handle<Value> argv[1] = { dataString };
-  // w->Emit(sym_data, 1, argv);
-  Local<Value> val = w->Get(String::NewSymbol("emit"));
-  if (val->IsFunction()) {
-    Local<Function> fn = val.As<Function>();
-
-    Local<Value> argv[2] = {
-      String::New("data"),
-      dataString
-    };
-
-    TryCatch tc;
-    fn->Call(w, 2, argv);
-    if (tc.HasCaught()) {
-      // handle exception..
-    }
-  }
+  Local<String> dataString = String::New((const char *)s);
+  Handle<Value> argv[1] = { dataString };
+  w->Emit(sym_data, 1, argv);
 
   return GENX_SUCCESS;
 }
@@ -622,27 +601,11 @@ genxStatus Writer::sender_sendBounded(void *userData, constUtf8 start, constUtf8
 {
   HandleScope scope;
   Writer *w = reinterpret_cast<Writer *>(userData);
-  Local<String> dataString = String::New((const char *)start, end - start);
-
-  // Handle<Value> argv[1] = { dataString };
-  // w->Emit(sym_data, 1, argv);
 
   // Deliver the data event
-  Local<Value> val = w->Get(String::NewSymbol("emit"));
-  if (val->IsFunction()) {
-    Local<Function> fn = val.As<Function>();
-
-    Local<Value> argv[2] = {
-      String::New("data"),
-      dataString
-    };
-
-    TryCatch tc;
-    fn->Call(w, 2, argv);
-    if (tc.HasCaught()) {
-      // handle exception..
-    }
-  }
+  Local<String> dataString = String::New((const char *)start, end - start);
+  Handle<Value> argv[1] = { dataString };
+  w->Emit(sym_data, 1, argv);
 
   return GENX_SUCCESS;
 }

@@ -32,6 +32,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include <node.h>
+#include <node_events.h>
 #include <iostream>
 
 #include "genx.h"

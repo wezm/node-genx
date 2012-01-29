@@ -60,7 +60,6 @@ public:
 protected:
 
   static Handle<Value> New(const Arguments& args);
-  void setUserData(void *userData);
 
   static Handle<Value> StartDoc(const Arguments& args);
   genxStatus startDoc();
