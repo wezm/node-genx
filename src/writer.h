@@ -35,6 +35,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define NODE_GENX_WRITER_H
 
 #include <node.h>
+#include <node_object_wrap.h>
 
 #include "genx.h"
 #include "node-genx.h"
