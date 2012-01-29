@@ -43,7 +43,6 @@ void Writer::Initialize(Handle<Object> target)
   HandleScope scope;
 
   Local<FunctionTemplate> t = FunctionTemplate::New(New);
-  t->Inherit(EventEmitter::constructor_template);
   t->InstanceTemplate()->SetInternalFieldCount(1);
   t->SetClassName(String::NewSymbol("Writer"));
 
@@ -584,6 +583,14 @@ utf8 Writer::createUtf8FromString(Handle<String> String)
   return string;
 }
 
+void Writer::Emit(int argc, Handle<Value>argv[])
+{
+  HandleScope scope;
+
+  Local<Function> emit = Local<Function>::Cast(handle_->Get(sym_emit));
+  emit->Call(handle_, argc, argv);
+}
+
 genxStatus Writer::sender_send(void *userData, constUtf8 s)
 {
   HandleScope scope;
@@ -591,8 +598,8 @@ genxStatus Writer::sender_send(void *userData, constUtf8 s)
 
   // Deliver the data event
   Local<String> dataString = String::New((const char *)s);
-  Handle<Value> argv[1] = { dataString };
-  w->Emit(sym_data, 1, argv);
+  Handle<Value> argv[2] = { sym_data, dataString };
+  w->Emit(2, argv);
 
   return GENX_SUCCESS;
 }
@@ -604,8 +611,8 @@ genxStatus Writer::sender_sendBounded(void *userData, constUtf8 start, constUtf8
 
   // Deliver the data event
   Local<String> dataString = String::New((const char *)start, end - start);
-  Handle<Value> argv[1] = { dataString };
-  w->Emit(sym_data, 1, argv);
+  Handle<Value> argv[2] = { sym_data, dataString };
+  w->Emit(2, argv);
 
   return GENX_SUCCESS;
 }

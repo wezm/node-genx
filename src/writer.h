@@ -98,6 +98,7 @@ protected:
 private:
   static utf8 createUtf8FromString(Handle<String> String);
 
+  void Emit(int argc, Handle<Value>argv[]);
   static genxStatus sender_send(void *userData, constUtf8 s);
   static genxStatus sender_sendBounded(void *userData, constUtf8 start, constUtf8 end);
   static genxStatus sender_flush(void * userData);
