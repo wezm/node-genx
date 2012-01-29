@@ -36,6 +36,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "attribute.h"
 #include "namespace.h"
 
+static Persistent<String> sym_data, sym_emit;
+
 void Writer::Initialize(Handle<Object> target)
 {
   HandleScope scope;
@@ -65,6 +67,7 @@ void Writer::Initialize(Handle<Object> target)
   target->Set(String::NewSymbol("Writer"), t->GetFunction());
 
   sym_data = NODE_PSYMBOL("data");
+  sym_emit = NODE_PSYMBOL("emit");
 }
 
 Writer::Writer()
