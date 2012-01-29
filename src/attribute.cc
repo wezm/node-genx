@@ -31,12 +31,8 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <node.h>
-#include <node_events.h>
 #include <iostream>
 
-#include "genx.h"
-#include "node-genx.h"
 #include "attribute.h"
 
 using namespace v8;
