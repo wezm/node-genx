@@ -23,6 +23,6 @@
   ],
   "scripts": {
     "preinstall": "node-waf configure build",
-    "test": "jasbin"
+    "test": "mocha"
   }
 }

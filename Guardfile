@@ -5,6 +5,6 @@
 #   watch('file/path') { `command(s)` }
 #
 guard 'shell' do
-  watch(%r"src/.*\.(?:cc|h)") { |m| `node-waf build && jasbin` }
-  watch(%r"spec/.*_spec\..*") {|m| `jasbin` }
+  watch(%r"src/.*\.(?:cc|h)") { |m| `node-waf build && mocha` }
+  watch(%r"test/.*_test\..*") {|m| `mocha` }
 end
