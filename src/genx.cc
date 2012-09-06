@@ -1136,7 +1136,7 @@ genxStatus genxStartDocSender(genxWriter w, genxSender * sender)
  *  we build it, then as each attribute is added, we fill in its value and
  *  mark the fact that it's been added, in the "provided" field.
  */
-static genxStatus writeStartTag(genxWriter w)
+static genxStatus writeStartTag(genxWriter w, bool inlineTag = 0)
 {
   int i;
   genxAttribute * aa = (genxAttribute *) w->attributes.pointers;
@@ -1181,7 +1181,7 @@ static genxStatus writeStartTag(genxWriter w)
       SendCheck(w, "\"");
     }
   }
-  SendCheck(w, ">");
+  if (!inlineTag) SendCheck(w, ">");
   return GENX_SUCCESS;
 }
 
@@ -1605,6 +1605,104 @@ genxStatus genxEndElement(genxWriter w)
 
   return GENX_SUCCESS;
 }
+genxStatus genxEndElementInline(genxWriter w)
+{
+  genxElement e;
+  int i;
+
+  switch (w->sequence)
+  {
+  case SEQUENCE_NO_DOC:
+  case SEQUENCE_PRE_DOC:
+  case SEQUENCE_POST_DOC:
+    return w->status = GENX_SEQUENCE_ERROR;
+  case SEQUENCE_START_TAG:
+  case SEQUENCE_ATTRIBUTES:
+    if ((w->status = writeStartTag(w, 1)) != GENX_SUCCESS)
+      return w->status;
+    break;
+  case SEQUENCE_CONTENT:
+    break;
+  }
+
+  /*
+   * first peek into the stack to find the right namespace declaration
+   *  (if any) so we can properly prefix the end-tag.  Have to do this
+   *  before unwinding the stack because that might reset some xmlns
+   *  prefixes to the context in the parent element
+   */
+  for (i = w->stack.count - 1; w->stack.pointers[i] != NULL; i -= 2)
+    ;
+  e = (genxElement) w->stack.pointers[--i];
+
+  /*SendCheck(w, "</");
+  if (e->ns && e->ns->declaration != w->xmlnsEquals)
+  {
+    SendCheck(w, e->ns->declaration->name + STRLEN_XMLNS_COLON);
+    SendCheck(w, ":");
+  }
+  SendCheck(w, e->type);*/
+  SendCheck(w, " />");
+
+  /*
+   * pop zero or more namespace declarations, then a null, then the
+   *  start-element declaration off the stack
+   */
+  w->stack.count--;
+  while (w->stack.pointers[w->stack.count] != NULL)
+  {
+    genxNamespace ns = (genxNamespace) w->stack.pointers[--w->stack.count];
+    w->stack.count--; /* don't need decl */
+
+    /* if not a fake unset-default namespace */
+    if (ns)
+    {
+      /*
+       * if they've stupidly jammed in their own namespace-prefix
+       *  declarations, we have to go looking to see if there's another
+       *  one in effect
+       */
+      if (ns->baroque)
+      {
+	i = w->stack.count;
+	while (i > 0)
+	{
+	  while (w->stack.pointers[i] != NULL)
+	  {
+	    genxAttribute otherDecl = (genxAttribute) w->stack.pointers[i--];
+	    genxNamespace otherNs = (genxNamespace) w->stack.pointers[i--];
+	    
+	    if (otherNs == ns)
+	    {
+	      ns->declaration = otherDecl;
+	      i = 0;
+	      break;
+	    }
+	  }
+	  
+	  /* skip NULL & element */
+	  i -= 2;
+	}
+      }
+      ns->declCount--;
+      if (ns->declCount == 0)
+	ns->baroque = False;
+    }
+  }
+
+  /* pop the NULL */
+  --w->stack.count;
+  if (w->stack.count < 0)
+    return w->status = GENX_NO_START_TAG;
+
+  if (w->stack.count == 0)
+    w->sequence = SEQUENCE_POST_DOC;
+  else
+    w->sequence = SEQUENCE_CONTENT;
+
+  return GENX_SUCCESS;
+}
+
 
 /*
  * Internal character-adder.  It tries to keep the number of sendx()

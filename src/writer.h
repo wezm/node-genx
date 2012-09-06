@@ -95,6 +95,9 @@ protected:
   static Handle<Value> EndElement(const Arguments& args);
   genxStatus endElement();
 
+  static Handle<Value> EndElementInline(const Arguments& args);
+  genxStatus endElementInline();
+
 private:
   static utf8 createUtf8FromString(Handle<String> String);
 

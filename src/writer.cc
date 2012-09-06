@@ -63,6 +63,7 @@ void Writer::Initialize(Handle<Object> target)
   NODE_SET_PROTOTYPE_METHOD(t, "addAttributeLiteral", AddAttributeLiteral);
 
   NODE_SET_PROTOTYPE_METHOD(t, "endElement", EndElement);
+  NODE_SET_PROTOTYPE_METHOD(t, "endElementInline", EndElementInline);
 
   target->Set(String::NewSymbol("Writer"), t->GetFunction());
 
@@ -570,6 +571,20 @@ Handle<Value> Writer::EndElement(const Arguments& args)
 genxStatus Writer::endElement()
 {
   return genxEndElement(writer);
+}
+
+Handle<Value> Writer::EndElementInline(const Arguments& args)
+{
+  HandleScope scope;
+  Writer* w = ObjectWrap::Unwrap<Writer>(args.This());
+
+  w->endElementInline();
+  return args.This();
+}
+
+genxStatus Writer::endElementInline()
+{
+  return genxEndElementInline(writer);
 }
 
 utf8 Writer::createUtf8FromString(Handle<String> String)
