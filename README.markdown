@@ -15,7 +15,11 @@ Installing
 Building From Source
 --------------------
 
-    node-waf configure build
+You will need to have [node-gyp][gyp] installed, then run:
+
+    node-gyp configure build
+
+[gyp]: https://github.com/TooTallNate/node-gyp
 
 Example
 -------
@@ -443,6 +447,8 @@ Contributors
 Changelog
 ---------
 
+* 1.0.0 -- 17 Jan 2013
+  * Update to support node 0.8.x
 * 0.9.0 -- 31 Jan 2012
   * Update to support node 0.6.x
 * 0.8.3 -- 22 Jun 2011
