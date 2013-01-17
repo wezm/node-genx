@@ -1,6 +1,6 @@
 {
   "name": "genx",
-  "version": "0.9.0",
+  "version": "1.0.0",
   "description": "Evented XML generation using the Genx C library",
   "keywords": [
     "xml",
@@ -13,7 +13,7 @@
   "repository": "git://github.com/wezm/node-genx.git",
   "main": "./lib/genx",
   "engines": {
-    "node": ">=0.6.0"
+    "node": ">=0.8.0"
   },
   "licenses": [
     {
@@ -22,7 +22,7 @@
     }
   ],
   "scripts": {
-    "preinstall": "node-waf configure build",
+    "preinstall": "node-gyp configure build",
     "test": "mocha"
   }
 }
