@@ -1,3 +1,4 @@
+[![build status](https://secure.travis-ci.org/wezm/node-genx.png)](http://travis-ci.org/wezm/node-genx)
 node-genx
 =========
 
