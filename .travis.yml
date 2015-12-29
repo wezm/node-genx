@@ -1,5 +1,26 @@
 language: node_js
-node_js:
-  - 0.8
-  - 0.9
-  - 4.2.1
+matrix:
+  include:
+    - node_js: "0.8"
+    - node_js: "0.9"
+    - node_js: "0.10"
+    - node_js: "0.11"
+    - node_js: "0.12"
+    - node_js: "4"
+      env: CXX=g++-4.8
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-4.8
+    - node_js: "4"
+      compiler: clang-3.6
+      env: CXX=clang-3.6
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.6
+          packages:
+            - clang-3.6

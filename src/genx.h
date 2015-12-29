@@ -124,14 +124,14 @@ utf8 genxGetNamespacePrefix(genxNamespace ns);
 /*
  * Declare a namespace.  The provided prefix is the default but can be
  *  overridden by genxAddNamespace.  If no default prefiix is provided,
- *  genx will generate one of the form g-%d.  
+ *  genx will generate one of the form g-%d.
  * On error, returns NULL and signals via statusp
  */
 genxNamespace genxDeclareNamespace(genxWriter w,
 				   constUtf8 uri, constUtf8 prefix,
 				   genxStatus * statusP);
 
-/* 
+/*
  * Declare an element
  * If something failed, returns NULL and sets the status code via statusP
  */
@@ -163,7 +163,7 @@ genxStatus genxStartDocFile(genxWriter w, FILE * file);
  */
 typedef struct
 {
-  genxStatus (* send)(void * userData, constUtf8 s); 
+  genxStatus (* send)(void * userData, constUtf8 s);
   genxStatus (* sendBounded)(void * userData, constUtf8 start, constUtf8 end);
   genxStatus (* flush)(void * userData);
 } genxSender;
@@ -277,14 +277,14 @@ int genxScrubText(genxWriter w, constUtf8 in, utf8 out);
 /*
  * return error messages
  */
-char * genxGetErrorMessage(genxWriter w, genxStatus status);
-char * genxLastErrorMessage(genxWriter w);
+const char * genxGetErrorMessage(genxWriter w, genxStatus status);
+const char * genxLastErrorMessage(genxWriter w);
 
 /*
  * return version
  */
-char * genxGetVersion();
- 
+const char * genxGetVersion();
+
 #ifdef __cplusplus
 }
 #endif

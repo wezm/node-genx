@@ -1,5 +1,5 @@
 var genx = require('../lib/genx');
-
+//noinspection JSUnresolvedFunction
 describe('genx', function(){
 
   describe('Writer', function(){
@@ -40,13 +40,13 @@ describe('genx', function(){
         });
 
         it("returns a Namespace object", function() {
-          w.declareNamespace('http://example.com/', 'test').should.be.ok
+          w.declareNamespace('http://example.com/', 'test').should.be.ok;
         });
       });
 
       describe('without a prefix', function() {
         it("returns a Namespace object", function() {
-          w.declareNamespace('http://example.com/').should.be.ok
+          w.declareNamespace('http://example.com/').should.be.ok;
         })
       })
     });
@@ -366,5 +366,5 @@ describe('genx', function(){
 
       result.should.equal("<doc1></doc1>\n<doc2></doc2>");
     });
-  })
-})
+  });
+});

@@ -31,43 +31,59 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <iostream>
+
+#include <node.h>
+#include <nan.h>
+
 #include "writer.h"
-#include "element.h"
-#include "attribute.h"
 #include "namespace.h"
 
-static Persistent<String> sym_data, sym_emit;
+using v8::Function;
+using v8::FunctionTemplate;
+using v8::Object;
+using v8::Handle;
+using v8::HandleScope;
+using v8::Local;
+using v8::Isolate;
+using v8::String;
+using v8::Value;
+using v8::External;
+using v8::Exception;
 
-void Writer::Initialize(Handle<Object> target)
+using Nan::Persistent;
+using Nan::ObjectWrap;
+
+Persistent<Function> Writer::constructor;
+
+void Writer::Initialize(Local<Object> exports)
 {
-  HandleScope scope;
+  Nan::HandleScope scope;
 
-  Local<FunctionTemplate> t = FunctionTemplate::New(New);
-  t->InstanceTemplate()->SetInternalFieldCount(1);
-  t->SetClassName(String::NewSymbol("Writer"));
+  Local<FunctionTemplate> tpl = Nan::New<FunctionTemplate>(New);
+  tpl->SetClassName(Nan::New("Writer").ToLocalChecked());
+  tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
-  NODE_SET_PROTOTYPE_METHOD(t, "startDocument", StartDoc);
-  NODE_SET_PROTOTYPE_METHOD(t, "endDocument", EndDocument);
+  Nan::SetPrototypeMethod(tpl, "startDocument", StartDoc);
+  Nan::SetPrototypeMethod(tpl, "endDocument", EndDocument);
 
-  NODE_SET_PROTOTYPE_METHOD(t, "declareNamespace", DeclareNamespace);
+  Nan::SetPrototypeMethod(tpl, "declareNamespace", DeclareNamespace);
 
-  NODE_SET_PROTOTYPE_METHOD(t, "declareElement", DeclareElement);
-  NODE_SET_PROTOTYPE_METHOD(t, "startElement", StartElement);
-  NODE_SET_PROTOTYPE_METHOD(t, "startElementLiteral", StartElementLiteral);
+  Nan::SetPrototypeMethod(tpl, "declareElement", DeclareElement);
+  Nan::SetPrototypeMethod(tpl, "startElement", StartElement);
+  Nan::SetPrototypeMethod(tpl, "startElementLiteral", StartElementLiteral);
 
-  NODE_SET_PROTOTYPE_METHOD(t, "addText", AddText);
-  NODE_SET_PROTOTYPE_METHOD(t, "addComment", AddComment);
+  Nan::SetPrototypeMethod(tpl, "addText", AddText);
+  Nan::SetPrototypeMethod(tpl, "addComment", AddComment);
 
-  NODE_SET_PROTOTYPE_METHOD(t, "declareAttribute", DeclareAttribute);
-  NODE_SET_PROTOTYPE_METHOD(t, "addAttribute", AddAttribute);
-  NODE_SET_PROTOTYPE_METHOD(t, "addAttributeLiteral", AddAttributeLiteral);
+  Nan::SetPrototypeMethod(tpl, "declareAttribute", DeclareAttribute);
+  Nan::SetPrototypeMethod(tpl, "addAttribute", AddAttribute);
+  Nan::SetPrototypeMethod(tpl, "addAttributeLiteral", AddAttributeLiteral);
 
-  NODE_SET_PROTOTYPE_METHOD(t, "endElement", EndElement);
+  Nan::SetPrototypeMethod(tpl, "endElement", EndElement);
 
-  target->Set(String::NewSymbol("Writer"), t->GetFunction());
-
-  sym_data = NODE_PSYMBOL("data");
-  sym_emit = NODE_PSYMBOL("emit");
+  constructor.Reset(tpl->GetFunction());
+  exports->Set(Nan::New("Writer").ToLocalChecked(), tpl->GetFunction());
 }
 
 Writer::Writer()
@@ -84,21 +100,18 @@ Writer::~Writer()
   genxDispose(writer);
 }
 
-Handle<Value> Writer::New(const Arguments& args)
+void Writer::New(const Nan::FunctionCallbackInfo <Value> &args)
 {
-  HandleScope scope;
   Writer* writer = new Writer();
   writer->Wrap(args.This());
-  return args.This();
+  args.GetReturnValue().Set(args.This());
 }
 
-Handle<Value> Writer::StartDoc(const Arguments& args)
+void Writer::StartDoc(const Nan::FunctionCallbackInfo <Value> &args)
 {
-  HandleScope scope;
   Writer* w = ObjectWrap::Unwrap<Writer>(args.This());
-
   w->startDoc();
-  return args.This();
+  args.GetReturnValue().Set(args.This());
 }
 
 genxStatus Writer::startDoc()
@@ -106,13 +119,11 @@ genxStatus Writer::startDoc()
   return genxStartDocSender(writer, &sender);
 }
 
-Handle<Value> Writer::EndDocument(const Arguments& args)
+void Writer::EndDocument(const Nan::FunctionCallbackInfo <Value> &args)
 {
-  HandleScope scope;
   Writer* w = ObjectWrap::Unwrap<Writer>(args.This());
-
   w->endDocument();
-  return args.This();
+  args.GetReturnValue().Set(args.This());
 }
 
 genxStatus Writer::endDocument()
@@ -121,9 +132,8 @@ genxStatus Writer::endDocument()
 }
 
 // uri, [prefix]
-Handle<Value> Writer::DeclareNamespace(const Arguments& args)
+void Writer::DeclareNamespace(const Nan::FunctionCallbackInfo <Value> &args)
 {
-  HandleScope scope;
   Writer* w = ObjectWrap::Unwrap<Writer>(args.This());
   Local<String> Uri;
   Local<String> Prefix;
@@ -135,60 +145,53 @@ Handle<Value> Writer::DeclareNamespace(const Arguments& args)
   switch(args.Length()) {
     case 1:
       if (!args[0]->IsString()) {
-        return ThrowException(Exception::TypeError(
-                  String::New("First argument to declareNamespace must be a string")));
+        Nan::ThrowTypeError("First argument to declareNamespace must be a string");
+        return;
       }
       Uri = args[0]->ToString();
       break;
     case 2:
       if (!args[0]->IsString()) {
-        return ThrowException(Exception::TypeError(
-                  String::New("First argument to declareNamespace must be a string")));
+        Nan::ThrowTypeError("First argument to declareNamespace must be a string");
+        return;
       }
       if (!args[1]->IsString()) {
-        return ThrowException(Exception::TypeError(
-                  String::New("Second argument to declareNamespace must be a string")));
+        Nan::ThrowTypeError("Second argument to declareNamespace must be a string");
+        return;
       }
       Uri = args[0]->ToString();
       Prefix = args[1]->ToString();
       prefix = createUtf8FromString(Prefix);
       break;
     default:
-      return ThrowException(Exception::Error(String::New(
-        "Wrong number of arguments to declareNamespace")));
+      Nan::ThrowError("Wrong number of arguments to declareNamespace");
+      return;
   }
 
   uri = createUtf8FromString(Uri);
-
-  Handle<Value> name_space = w->declareNamespace(uri, prefix);
+  w->declareNamespace(args, uri, prefix);
   delete[] uri;
   if (prefix != NULL) delete[] prefix;
-
-  return name_space;
 }
 
-Handle<Value> Writer::declareNamespace(constUtf8 uri, constUtf8 prefix)
+void Writer::declareNamespace(const Nan::FunctionCallbackInfo<Value> &args, constUtf8 uri, constUtf8 prefix)
 {
-  HandleScope scope;
   genxStatus status = GENX_SUCCESS;
   genxNamespace name_space = genxDeclareNamespace(writer, uri, prefix, &status);
 
   if (status != GENX_SUCCESS) {
-    return ThrowException(Exception::Error(String::New(
-      genxGetErrorMessage(writer, status))));
+    Nan::ThrowError(genxGetErrorMessage(writer, status));
+    return;
   }
 
-  Local<Value> argv[1];
-  argv[0] = External::New(name_space);
-  Persistent<Object> ns (Namespace::constructor_template->GetFunction()->NewInstance(1, argv));
-
-  return Persistent<Value>::New(ns);
+  Local<Value> argv[1] = { GET_EXTERNAL(args.GetIsolate(), name_space) };
+  Local<Function> con  = Nan::New<Function>(Namespace::constructor);
+  args.GetReturnValue().Set(con->NewInstance(1, argv));
 }
 
 // [namespace], elementName
-Handle<Value> Writer::DeclareElement(const Arguments& args)
+void Writer::DeclareElement(const Nan::FunctionCallbackInfo <Value> &args)
 {
-  HandleScope scope;
   Writer* w = ObjectWrap::Unwrap<Writer>(args.This());
   Namespace *name_space = NULL;
   Local<String> Text;
@@ -200,92 +203,83 @@ Handle<Value> Writer::DeclareElement(const Arguments& args)
   switch(args.Length()) {
     case 1:
       if (!args[0]->IsString()) {
-        return ThrowException(Exception::TypeError(
-                  String::New("First argument must be a string")));
+        Nan::ThrowTypeError("First argument must be a string");
+        return;
       }
       Text = args[0]->ToString();
       break;
     case 2:
       if (!args[0]->IsObject()) {
-        return ThrowException(Exception::TypeError(
-                  String::New("First argument must a Namespace")));
+        Nan::ThrowTypeError("First argument must a Namespace");
+        return;
       }
       if (!args[1]->IsString()) {
-        return ThrowException(Exception::TypeError(
-                  String::New("Second argument must be a string")));
+        Nan::ThrowTypeError("Second argument must be a string");
+        return;
       }
       name_space = ObjectWrap::Unwrap<Namespace>(args[0]->ToObject());
       Text = args[1]->ToString();
       break;
     default:
-      return ThrowException(Exception::Error(String::New(
-        "Wrong number of arguments to declareElement")));
+      Nan::ThrowError("Wrong number of arguments to declareElement");
+      return;
   }
 
   name = createUtf8FromString(Text);
   if (name_space != NULL) ns = name_space->getNamespace();
 
-  Handle<Value> elem = w->declareElement(ns, name);
+  w->declareElement(args, ns, name);
   delete[] name;
-
-  return elem;
 }
 
-Handle<Value> Writer::declareElement(genxNamespace ns, constUtf8 name)
+void Writer::declareElement(const Nan::FunctionCallbackInfo<Value> &args, genxNamespace ns, constUtf8 name)
 {
-  HandleScope scope;
   genxStatus status = GENX_SUCCESS;
   genxElement element = genxDeclareElement(writer, ns, name, &status);
 
   if (status != GENX_SUCCESS) {
-    return ThrowException(Exception::Error(String::New(
-      genxGetErrorMessage(writer, status))));
+    Nan::ThrowError(genxGetErrorMessage(writer, status));
+    return;
   }
 
-  Local<Value> argv[1];
-  argv[0] = External::New(element);
-  Persistent<Object> e (Element::constructor_template->GetFunction()->NewInstance(1, argv));
-
-  return Persistent<Value>::New(e);
+  Local<Value> argv[1] = { GET_EXTERNAL(args.GetIsolate(), element) };
+  Local<Function> cons = Nan::New<Function>(Element::constructor);
+  args.GetReturnValue().Set(cons->NewInstance(1, argv));
 }
 
-Handle<Value> Writer::StartElement(const Arguments& args)
+void Writer::StartElement(const Nan::FunctionCallbackInfo <Value> &args)
 {
-  HandleScope scope;
   Writer* w = ObjectWrap::Unwrap<Writer>(args.This());
 
   if (args.Length() < 1) {
-    return ThrowException(Exception::Error(
-              String::New("Not enough arguments to startElement")));
+    Nan::ThrowError("Not enough arguments to startElement");
+    return;
   }
   else if(!args[0]->IsObject()) {
-    return ThrowException(Exception::TypeError(
-              String::New("Argument to startElement must be an Element")));
+    Nan::ThrowTypeError("Argument to startElement must be an Element");
+    return;
   }
 
   Element *e = ObjectWrap::Unwrap<Element>(args[0]->ToObject());
 
-  Handle<Value> result = w->startElement(e);
-
-  return result->IsUndefined() ? args.This() : result;
+  w->startElement(args, e);
 }
 
-Handle<Value> Writer::startElement(Element *elem)
+void Writer::startElement(const Nan::FunctionCallbackInfo<Value> &args, Element *elem)
 {
   genxStatus status = elem->start();
 
   if (status != GENX_SUCCESS) {
-    return ThrowException(Exception::Error(String::New(
-      genxGetErrorMessage(writer, status))));
+    Nan::ThrowError(genxGetErrorMessage(writer, status));
+    return;
   }
 
-  return Undefined();
+  args.GetReturnValue().Set(args.This());
 }
 
 // [namespace], type
-Handle<Value> Writer::StartElementLiteral(const Arguments& args)
+void Writer::StartElementLiteral(const Nan::FunctionCallbackInfo <Value> &args)
 {
-  HandleScope scope;
   Writer* w = ObjectWrap::Unwrap<Writer>(args.This());
   Local<String> Namespace;
   Local<String> Type;
@@ -297,125 +291,115 @@ Handle<Value> Writer::StartElementLiteral(const Arguments& args)
   switch(args.Length()) {
     case 1:
       if (!args[0]->IsString()) {
-        return ThrowException(Exception::TypeError(
-                  String::New("First argument must be a string")));
+        Nan::ThrowTypeError("First argument must be a string");
+        return;
       }
       Type = args[0]->ToString();
       break;
     case 2:
       if (!args[0]->IsString()) {
-        return ThrowException(Exception::TypeError(
-                  String::New("First argument must a string")));
+        Nan::ThrowTypeError("First argument must a string");
+        return;
       }
       if (!args[1]->IsString()) {
-        return ThrowException(Exception::TypeError(
-                  String::New("Second argument must be a string")));
+        Nan::ThrowTypeError("Second argument must be a string");
+        return;
       }
       Namespace = args[0]->ToString();
       name_space = createUtf8FromString(Namespace);
       Type = args[1]->ToString();
       break;
     default:
-      return ThrowException(Exception::Error(String::New(
-        "Wrong number of arguments to startElementLiteral")));
+      Nan::ThrowError("Wrong number of arguments to startElementLiteral");
+      return;
   }
 
   type = createUtf8FromString(Type);
 
-  Handle<Value> result = w->startElementLiteral(name_space, type);
+  w->startElementLiteral(args, name_space, type);
   delete[] type;
-
-  return result->IsUndefined() ? args.This() : result;
 }
 
-Handle<Value> Writer::startElementLiteral(constUtf8 ns, constUtf8 type)
+void Writer::startElementLiteral(const Nan::FunctionCallbackInfo<Value> &args, constUtf8 ns, constUtf8 type)
 {
   genxStatus status = genxStartElementLiteral(writer, ns, type);
 
   if (status != GENX_SUCCESS) {
-    return ThrowException(Exception::Error(String::New(
-      genxGetErrorMessage(writer, status))));
+    Nan::ThrowError(genxGetErrorMessage(writer, status));
+    return;
   }
-
-  return Undefined();
+  args.GetReturnValue().Set(args.This());
 }
 
-Handle<Value> Writer::AddText(const Arguments& args)
+void Writer::AddText(const Nan::FunctionCallbackInfo <Value> &args)
 {
-  HandleScope scope;
   Writer* w = ObjectWrap::Unwrap<Writer>(args.This());
   utf8 text = NULL;
 
   if (args.Length() < 1) {
-    return ThrowException(Exception::Error(String::New(
-      "Not enough arguments to addText")));
+    Nan::ThrowError("Not enough arguments to addText");
+    return;
   }
   else if(!args[0]->IsString()) {
-    return ThrowException(Exception::TypeError(String::New(
-      "Argument to addText must be a string")));
+    Nan::ThrowTypeError("Argument to addText must be a string");
+    return;
   }
 
   Local<String> Text = args[0]->ToString();
   text = createUtf8FromString(Text);
 
-  Handle<Value> result = w->addText(text);
+  w->addText(args, text);
   delete[] text;
-
-  return result->IsUndefined() ? args.This() : result;
 }
 
-Handle<Value> Writer::addText(constUtf8 text)
+void Writer::addText(const Nan::FunctionCallbackInfo<Value> &args, constUtf8 text)
 {
   genxStatus status = genxAddText(writer, text);
 
   if (status != GENX_SUCCESS) {
-    return ThrowException(Exception::Error(String::New(
-      genxGetErrorMessage(writer, status))));
+    Nan::ThrowError(genxGetErrorMessage(writer, status));
+    return;
   }
 
-  return Undefined();
+  args.GetReturnValue().Set(args.This());
 }
 
-Handle<Value> Writer::AddComment(const Arguments& args)
+void Writer::AddComment(const Nan::FunctionCallbackInfo <Value> &args)
 {
-  HandleScope scope;
   Writer* w = ObjectWrap::Unwrap<Writer>(args.This());
   utf8 text = NULL;
 
   if (args.Length() < 1) {
-    return ThrowException(Exception::Error(String::New(
-      "Not enough arguments to addComment")));
+    Nan::ThrowError("Not enough arguments to addComment");
+    return;
   }
   else if(!args[0]->IsString()) {
-    return ThrowException(Exception::TypeError(String::New(
-      "Argument to addComment must be a string")));
+    Nan::ThrowTypeError("Argument to addComment must be a string");
+    return;
   }
 
   Local<String> Text = args[0]->ToString();
   text = createUtf8FromString(Text);
 
-  Handle<Value> result = w->addComment(text);
+  w->addComment(args, text);
   delete[] text;
-
-  return result->IsUndefined() ? args.This() : result;
 }
 
-Handle<Value> Writer::addComment(constUtf8 comment)
+void Writer::addComment(const Nan::FunctionCallbackInfo<Value> &args, constUtf8 comment)
 {
   genxStatus status = genxComment(writer, comment);
 
   if (status != GENX_SUCCESS) {
-    return ThrowException(Exception::Error(String::New(
-      genxGetErrorMessage(writer, status))));
+    Nan::ThrowError(genxGetErrorMessage(writer, status));
+    return;
   }
 
-  return Undefined();
+  args.GetReturnValue().Set(args.This());
 }
 
 // [namespace], name
-Handle<Value> Writer::DeclareAttribute(const Arguments& args)
+void Writer::DeclareAttribute(const Nan::FunctionCallbackInfo <Value> &args)
 {
-  HandleScope scope;
   Writer* w = ObjectWrap::Unwrap<Writer>(args.This());
   Namespace *name_space = NULL;
   Local<String> Text;
@@ -427,108 +411,97 @@ Handle<Value> Writer::DeclareAttribute(const Arguments& args)
   switch(args.Length()) {
     case 1:
       if (!args[0]->IsString()) {
-        return ThrowException(Exception::TypeError(
-                  String::New("First argument must be a string")));
+        Nan::ThrowTypeError("First argument must be a string");
+        return;
       }
       Text = args[0]->ToString();
       break;
     case 2:
       if (!args[0]->IsObject()) {
-        return ThrowException(Exception::TypeError(
-                  String::New("First argument must a Namespace")));
+        Nan::ThrowTypeError("First argument must a Namespace");
+        return;
       }
       if (!args[1]->IsString()) {
-        return ThrowException(Exception::TypeError(
-                  String::New("Second argument must be a string")));
+        Nan::ThrowTypeError("Second argument must be a string");
+        return;
       }
       name_space = ObjectWrap::Unwrap<Namespace>(args[0]->ToObject());
       Text = args[1]->ToString();
       break;
     default:
-      return ThrowException(Exception::Error(String::New(
-        "Wrong number of arguments to declareAttribute")));
+      Nan::ThrowError("Wrong number of arguments to declareAttribute");
+      return;
   }
 
   name = createUtf8FromString(Text);
   if (name_space != NULL) ns = name_space->getNamespace();
 
-  Handle<Value> attr = w->declareAttribute(ns, name);
+  w->declareAttribute(args, ns, name);
   delete[] name;
-
-  return attr;
 }
 
-Handle<Value> Writer::declareAttribute(genxNamespace ns, constUtf8 name)
+void Writer::declareAttribute(const Nan::FunctionCallbackInfo<Value> &args, genxNamespace ns, constUtf8 name)
 {
-  HandleScope scope;
   genxStatus status = GENX_SUCCESS;
   genxAttribute attribute = genxDeclareAttribute(writer, ns, name, &status);
 
   if (status != GENX_SUCCESS) {
-    return ThrowException(Exception::Error(String::New(
-      genxGetErrorMessage(writer, status))));
+    Nan::ThrowError(genxGetErrorMessage(writer, status));
+    return;
   }
 
-  Local<Value> argv[1];
-  argv[0] = External::New(attribute);
-  Persistent<Object> a (Attribute::constructor_template->GetFunction()->NewInstance(1, argv));
-
-  return Persistent<Value>::New(a);
+  Local<Value> argv[1] = {GET_EXTERNAL(args.GetIsolate(), attribute) };
+  Local<Function> cons = Nan::New<Function>(Attribute::constructor);
+  args.GetReturnValue().Set(cons->NewInstance(1, argv));
 }
 
-Handle<Value> Writer::AddAttribute(const Arguments& args)
+void Writer::AddAttribute(const Nan::FunctionCallbackInfo <Value> &args)
 {
-  HandleScope scope;
   Writer* w = ObjectWrap::Unwrap<Writer>(args.This());
   utf8 value = NULL;
 
   if (args.Length() < 2) {
-    return ThrowException(Exception::Error(
-              String::New("Wrong number of arguments to addAttribute")));
+    Nan::ThrowError("Wrong number of arguments to addAttribute");
+    return;
   }
   else if(!args[0]->IsObject()) {
-    return ThrowException(Exception::TypeError(
-              String::New("First argument to addAttribute must be an Attribute")));
+    Nan::ThrowTypeError("First argument to addAttribute must be an Attribute");
+    return;
   }
   else if(!args[1]->IsString()) {
-    return ThrowException(Exception::TypeError(
-              String::New("Second argument to addAttribute must be a string")));
+    Nan::ThrowTypeError("Second argument to addAttribute must be a string");
+    return;
   }
 
   Attribute *attr = ObjectWrap::Unwrap<Attribute>(args[0]->ToObject());
   Local<String> Text = args[1]->ToString();
   value = createUtf8FromString(Text);
 
-  Handle<Value> result = w->addAttribute(attr, value);
+  w->addAttribute(args, attr, value);
   delete[] value;
-
-  return result->IsUndefined() ? args.This() : result;
 }
 
-Handle<Value> Writer::addAttribute(Attribute *attr, constUtf8 value)
+void Writer::addAttribute(const Nan::FunctionCallbackInfo<Value> &args, Attribute *attr, constUtf8 value)
 {
   genxStatus status = attr->add(value);
 
   if (status != GENX_SUCCESS) {
-    return ThrowException(Exception::Error(String::New(
-      genxGetErrorMessage(writer, status))));
+    Nan::ThrowError(genxGetErrorMessage(writer, status));
+    return;
   }
 
-  return Undefined();
+  args.GetReturnValue().Set(args.This());
 }
 
-Handle<Value> Writer::AddAttributeLiteral(const Arguments& args)
+void Writer::AddAttributeLiteral(const Nan::FunctionCallbackInfo <Value> &args)
 {
-  HandleScope scope;
   Writer* w = ObjectWrap::Unwrap<Writer>(args.This());
   utf8 name = NULL;
   utf8 value = NULL;
 
-  if (args.Length() < 2    ||
-     !args[0]->IsString() ||
-     !args[1]->IsString()) {
-    return ThrowException(Exception::Error(String::New(
-      "Two string arguments must be supplied to addAttributeLiteral")));
+  if (args.Length() < 2 || !args[0]->IsString() || !args[1]->IsString()) {
+    Nan::ThrowError("Two string arguments must be supplied to addAttributeLiteral");
+    return;
   }
 
   Local<String> Name = args[0]->ToString();
@@ -538,38 +511,40 @@ Handle<Value> Writer::AddAttributeLiteral(const Arguments& args)
   name = createUtf8FromString(Name);
   value = createUtf8FromString(Val);
 
-  Handle<Value> result = w->addAttributeLiteral(name, value);
+  w->addAttributeLiteral(args, name, value);
   delete[] name;
   delete[] value;
-
-  return result->IsUndefined() ? args.This() : result;
 }
 
-Handle<Value> Writer::addAttributeLiteral(constUtf8 name, constUtf8 value)
+void Writer::addAttributeLiteral(const Nan::FunctionCallbackInfo<Value> &args, constUtf8 name, constUtf8 value)
 {
   constUtf8 xmlns = NULL;
 
   genxStatus status = genxAddAttributeLiteral(writer, xmlns, name, value);
   if (status != GENX_SUCCESS) {
-    return ThrowException(Exception::Error(String::New(
-      genxGetErrorMessage(writer, status))));
+    Nan::ThrowError(genxGetErrorMessage(writer, status));
+    return;
   }
 
-  return Undefined();
+  args.GetReturnValue().Set(args.This());
 }
 
-Handle<Value> Writer::EndElement(const Arguments& args)
+void Writer::EndElement(const Nan::FunctionCallbackInfo <Value> &args)
 {
-  HandleScope scope;
   Writer* w = ObjectWrap::Unwrap<Writer>(args.This());
 
-  w->endElement();
-  return args.This();
+  w->endElement(args);
 }
 
-genxStatus Writer::endElement()
+void Writer::endElement(const Nan::FunctionCallbackInfo<Value> &args)
 {
-  return genxEndElement(writer);
+  genxStatus status = genxEndElement(writer);
+  if (status != GENX_SUCCESS) {
+    Nan::ThrowError(genxGetErrorMessage(writer, status));
+    return;
+  }
+
+  args.GetReturnValue().Set(args.This());
 }
 
 utf8 Writer::createUtf8FromString(Handle<String> String)
@@ -585,20 +560,17 @@ utf8 Writer::createUtf8FromString(Handle<String> String)
 
 void Writer::Emit(int argc, Handle<Value>argv[])
 {
-  HandleScope scope;
-
-  Local<Function> emit = Local<Function>::Cast(handle_->Get(sym_emit));
-  emit->Call(handle_, argc, argv);
+  Local<Function> emit = Local<Function>::Cast(handle()->Get(Nan::New("emit").ToLocalChecked()));
+  emit->Call(handle(), argc, argv);
 }
 
 genxStatus Writer::sender_send(void *userData, constUtf8 s)
 {
-  HandleScope scope;
   Writer *w = reinterpret_cast<Writer *>(userData);
 
   // Deliver the data event
-  Local<String> dataString = String::New((const char *)s);
-  Handle<Value> argv[2] = { sym_data, dataString };
+  Local<String> dataString = Nan::New((const char *)s).ToLocalChecked();
+  Local<Value> argv[2] = { Nan::New("data").ToLocalChecked(), dataString };
   w->Emit(2, argv);
 
   return GENX_SUCCESS;
@@ -606,12 +578,11 @@ genxStatus Writer::sender_send(void *userData, constUtf8 s)
 
 genxStatus Writer::sender_sendBounded(void *userData, constUtf8 start, constUtf8 end)
 {
-  HandleScope scope;
   Writer *w = reinterpret_cast<Writer *>(userData);
 
   // Deliver the data event
-  Local<String> dataString = String::New((const char *)start, end - start);
-  Handle<Value> argv[2] = { sym_data, dataString };
+  Local<String> dataString = Nan::New((const char *)start, (int) (end - start)).ToLocalChecked();
+  Local<Value> argv[2] = { Nan::New("data").ToLocalChecked(), dataString };
   w->Emit(2, argv);
 
   return GENX_SUCCESS;

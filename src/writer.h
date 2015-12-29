@@ -35,23 +35,22 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define NODE_GENX_WRITER_H
 
 #include <node.h>
-#include <node_object_wrap.h>
+#include <nan.h>
 
 #include "genx.h"
 #include "node-genx.h"
 #include "attribute.h"
 #include "element.h"
 
-using namespace v8;
-using namespace node;
-
-class Writer: public ObjectWrap
+class Writer: public Nan::ObjectWrap
 {
 private:
   genxWriter writer;
   genxSender sender;
+
+  static Nan::Persistent<v8::Function> constructor;
 public:
-  static void Initialize(Handle<Object> target);
+  static void Initialize(v8::Local<v8::Object> target);
 
   Writer();
 
@@ -59,46 +58,48 @@ public:
 
 protected:
 
-  static Handle<Value> New(const Arguments& args);
+  static void New(const Nan::FunctionCallbackInfo <v8::Value> &args);
 
-  static Handle<Value> StartDoc(const Arguments& args);
+  static void StartDoc(const Nan::FunctionCallbackInfo <v8::Value> &args);
   genxStatus startDoc();
 
-  static Handle<Value> EndDocument(const Arguments& args);
+  static void EndDocument(const Nan::FunctionCallbackInfo <v8::Value> &args);
   genxStatus endDocument();
 
-  static Handle<Value> DeclareNamespace(const Arguments& args);
-  Handle<Value> declareNamespace(constUtf8 ns, constUtf8 name);
+  static void DeclareNamespace(const Nan::FunctionCallbackInfo <v8::Value> &args);
+  void declareNamespace(const Nan::FunctionCallbackInfo<v8::Value> &args, constUtf8 ns, constUtf8 name);
 
-  static Handle<Value> DeclareElement(const Arguments& args);
-  Handle<Value> declareElement(genxNamespace ns, constUtf8 name);
-  
-  static Handle<Value> StartElement(const Arguments& args);
-  Handle<Value> startElement(Element *elem);
-  static Handle<Value> StartElementLiteral(const Arguments& args);
-  Handle<Value> startElementLiteral(constUtf8 ns, constUtf8 type);
+  static void DeclareElement(const Nan::FunctionCallbackInfo <v8::Value> &args);
+  void declareElement(const Nan::FunctionCallbackInfo<v8::Value> &args, genxNamespace ns, constUtf8 name);
 
-  static Handle<Value> AddText(const Arguments& args);
-  Handle<Value> addText(constUtf8 text);
+  static void StartElement(const Nan::FunctionCallbackInfo <v8::Value> &args);
+  void startElement(const Nan::FunctionCallbackInfo<v8::Value> &args, Element *elem);
 
-  static Handle<Value> AddComment(const Arguments& args);
-  Handle<Value> addComment(constUtf8 comment);
+  static void StartElementLiteral(const Nan::FunctionCallbackInfo <v8::Value> &args);
+  void startElementLiteral(const Nan::FunctionCallbackInfo<v8::Value> &args, constUtf8 ns, constUtf8 type);
 
-  static Handle<Value> DeclareAttribute(const Arguments& args);
-  Handle<Value> declareAttribute(genxNamespace ns, constUtf8 name);
+  static void AddText(const Nan::FunctionCallbackInfo <v8::Value> &args);
+  void addText(const Nan::FunctionCallbackInfo<v8::Value> &args, constUtf8 text);
 
-  static Handle<Value> AddAttribute(const Arguments& args);
-  Handle<Value> addAttribute(Attribute *attr, constUtf8 value);
-  static Handle<Value> AddAttributeLiteral(const Arguments& args);
-  Handle<Value> addAttributeLiteral(constUtf8 name, constUtf8 value);
+  static void AddComment(const Nan::FunctionCallbackInfo <v8::Value> &args);
+  void addComment(const Nan::FunctionCallbackInfo<v8::Value> &args, constUtf8 comment);
 
-  static Handle<Value> EndElement(const Arguments& args);
-  genxStatus endElement();
+  static void DeclareAttribute(const Nan::FunctionCallbackInfo <v8::Value> &args);
+  void declareAttribute(const Nan::FunctionCallbackInfo<v8::Value> &args, genxNamespace ns, constUtf8 name);
+
+  static void AddAttribute(const Nan::FunctionCallbackInfo <v8::Value> &args);
+  void addAttribute(const Nan::FunctionCallbackInfo<v8::Value> &args, Attribute *attr, constUtf8 value);
+
+  static void AddAttributeLiteral(const Nan::FunctionCallbackInfo <v8::Value> &args);
+  void addAttributeLiteral(const Nan::FunctionCallbackInfo<v8::Value> &args, constUtf8 name, constUtf8 value);
+
+  static void EndElement(const Nan::FunctionCallbackInfo <v8::Value> &args);
+  void endElement(const Nan::FunctionCallbackInfo<v8::Value> &args);
 
 private:
-  static utf8 createUtf8FromString(Handle<String> String);
+  static utf8 createUtf8FromString(v8::Handle<v8::String> String);
 
-  void Emit(int argc, Handle<Value>argv[]);
+  void Emit(int argc, v8::Handle<v8::Value>argv[]);
   static genxStatus sender_send(void *userData, constUtf8 s);
   static genxStatus sender_sendBounded(void *userData, constUtf8 start, constUtf8 end);
   static genxStatus sender_flush(void * userData);

@@ -34,24 +34,22 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef NODE_GENX_NAMESPACE_H
 #define NODE_GENX_NAMESPACE_H
 
-#include <v8.h>
 #include <node.h>
+#include <nan.h>
+
 extern "C" {
 #include "genx.h"
 }
 #include "node-genx.h"
 
-using namespace v8;
-using namespace node;
-
-class Namespace: ObjectWrap
+class Namespace : public Nan::ObjectWrap
 {
 private:
   genxNamespace name_space;
 
 public:
-  static Persistent<FunctionTemplate> constructor_template;
-  static void Initialize(Handle<Object> target);
+  static Nan::Persistent<v8::Function> constructor;
+  static void Initialize(v8::Local<v8::Object> exports);
 
   Namespace(genxNamespace ns);
   ~Namespace();
@@ -59,8 +57,8 @@ public:
   genxNamespace getNamespace();
 
 protected:
-  static Handle<Value> New(const Arguments& args);
-  static Handle<Value> GetPrefix(const Arguments& args);
+  static void New(const Nan::FunctionCallbackInfo<v8::Value>& args);
+  static void GetPrefix(const Nan::FunctionCallbackInfo <v8::Value>& args);
   utf8 getPrefix();
 };
 
