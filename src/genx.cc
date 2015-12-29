@@ -1622,7 +1622,7 @@ genxStatus genxEndElementInline(genxWriter w)
       return w->status;
     break;
   case SEQUENCE_CONTENT:
-    break;
+    return w->status = GENX_SEQUENCE_ERROR;
   }
 
   /*
@@ -1631,8 +1631,7 @@ genxStatus genxEndElementInline(genxWriter w)
    *  before unwinding the stack because that might reset some xmlns
    *  prefixes to the context in the parent element
    */
-  for (i = w->stack.count - 1; w->stack.pointers[i] != NULL; i -= 2)
-    ;
+  for (i = w->stack.count - 1; w->stack.pointers[i] != NULL; i -= 2);
   e = (genxElement) w->stack.pointers[--i];
 
   /*SendCheck(w, "</");
@@ -1664,29 +1663,29 @@ genxStatus genxEndElementInline(genxWriter w)
        */
       if (ns->baroque)
       {
-	i = w->stack.count;
-	while (i > 0)
-	{
-	  while (w->stack.pointers[i] != NULL)
-	  {
-	    genxAttribute otherDecl = (genxAttribute) w->stack.pointers[i--];
-	    genxNamespace otherNs = (genxNamespace) w->stack.pointers[i--];
-	    
-	    if (otherNs == ns)
-	    {
-	      ns->declaration = otherDecl;
-	      i = 0;
-	      break;
-	    }
-	  }
-	  
-	  /* skip NULL & element */
-	  i -= 2;
-	}
+        i = w->stack.count;
+        while (i > 0)
+        {
+          while (w->stack.pointers[i] != NULL)
+          {
+            genxAttribute otherDecl = (genxAttribute) w->stack.pointers[i--];
+            genxNamespace otherNs = (genxNamespace) w->stack.pointers[i--];
+
+            if (otherNs == ns)
+            {
+              ns->declaration = otherDecl;
+              i = 0;
+              break;
+            }
+          }
+
+          /* skip NULL & element */
+          i -= 2;
+        }
       }
       ns->declCount--;
       if (ns->declCount == 0)
-	ns->baroque = False;
+	      ns->baroque = False;
     }
   }
 

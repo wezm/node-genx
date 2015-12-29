@@ -209,6 +209,32 @@ describe('genx', function(){
       });
     });
 
+    describe('endElementInline', function() {
+      beforeEach(function() {
+        w.startDocument();
+      });
+
+      it('can generate a self-closing tag', function() {
+        w.startElementLiteral('elem')
+         .endElementInline();
+      });
+
+      it('raises an exception if no element has been started', function() {
+        (function() {
+          w.endElementInline();
+        }).should.throw('Call out of sequence');
+      });
+
+      it('raises an exception if an element has children', function() {
+        (function() {
+          w.startElementLiteral('elem')
+           .startElementLiteral('elem2')
+           .endElement()
+           .endElementInline();
+        }).should.throw('Call out of sequence');
+      });
+    });
+
     describe('addAttribute', function() {
       var attr = null;
 
