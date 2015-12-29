@@ -1,6 +1,6 @@
 {
   "name": "genx",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Evented XML generation using the Genx C library",
   "keywords": [
     "xml",
