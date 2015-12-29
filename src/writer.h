@@ -96,8 +96,8 @@ protected:
   static void EndElement(const Nan::FunctionCallbackInfo <v8::Value> &args);
   void endElement(const Nan::FunctionCallbackInfo<v8::Value> &args);
 
-  static Handle<Value> EndElementInline(const Arguments& args);
-  genxStatus endElementInline();
+  static void EndElementInline(const Nan::FunctionCallbackInfo<v8::Value> &args);
+  void endElementInline(const Nan::FunctionCallbackInfo<v8::Value> &args);
 
 private:
   static utf8 createUtf8FromString(v8::Handle<v8::String> String);
