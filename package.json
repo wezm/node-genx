@@ -24,8 +24,8 @@
   ],
   "scripts": {
     "clean": "(mkdir build || rm -rf build) && mkdir -p build",
-    "cmake": "cd build && cmake .. && make -j6",
-    "cmake-debug": "source ~/.nvm/nvm.sh && nvm use 4.2.3 && cd build && cmake -DCMAKE_BUILD_TYPE=Debug .. && make -j6",
+    "cmake": "cd build && cmake .. && make -j",
+    "cmake-debug": "cd build && cmake -DCMAKE_BUILD_TYPE=Debug .. && make -j",
     "test": "mocha"
   },
   "optionalDependencies": {

@@ -1,5 +1,6 @@
 var genx = require('../lib/genx');
 
+// Passing "true" to the constructor indicates we want to nicely format the output
 var w = new genx.Writer(true);
 
 w.on('data', function(data) {
