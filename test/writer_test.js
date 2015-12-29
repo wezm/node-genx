@@ -379,6 +379,73 @@ describe('genx', function(){
       });
     });
 
+    describe('generating a prettyprinted document', function() {
+      beforeEach(function() {
+        w = new genx.Writer(true);
+      });
+
+      describe('using literal nodes', function(){
+        it('generates the correct XML', function() {
+          var result = '';
+
+          w.on('data', function(data) {
+            result += data;
+          });
+
+          w.startDocument()
+           .addComment(' Testing ')
+           .startElementLiteral('http://www.w3.org/2005/Atom', 'feed')
+           .startElementLiteral('title').addAttributeLiteral('type', 'text')
+           .addText('Testing').endElement().endElement().endDocument();
+          result.should.equal("<!-- Testing -->\n\n<g1:feed xmlns:g1=\"http://www.w3.org/2005/Atom\">\n\t<title type=\"text\">Testing</title>\n</g1:feed>");
+        });
+
+        it('correctly spaces trailing text nodes', function() {
+          var result = '';
+
+          w.on('data', function(data) {
+            result += data;
+          });
+
+          w.startDocument()
+           .addComment(' Testing ')
+           .startElementLiteral('http://www.w3.org/2005/Atom', 'feed')
+           .startElementLiteral('title').addAttributeLiteral('type', 'text')
+           .addText('Testing')
+           .endElement()
+           .addText('Trailing Text')
+           .endElement()
+           .endDocument();
+          result.should.equal("<!-- Testing -->\n\n<g1:feed xmlns:g1=\"http://www.w3.org/2005/Atom\">\n\t" +
+                              "<title type=\"text\">Testing</title>\n\tTrailing Text\n</g1:feed>");
+        });
+
+        it('correctly spaces comments', function() {
+          var result = '';
+
+          w.on('data', function(data) {
+            result += data;
+          });
+
+          w.startDocument()
+            .startElementLiteral('http://www.w3.org/2005/Atom', 'feed')
+              .startElementLiteral('title').addAttributeLiteral('type', 'text')
+                .addText('Testing')
+              .endElement()
+              .addComment(' Testing ')
+              .addText('Trailing Text')
+              .startElementLiteral('comment-only')
+                .addComment(' Testing ')
+              .endElement()
+            .endElement()
+            .endDocument();
+          result.should.equal("\n<g1:feed xmlns:g1=\"http://www.w3.org/2005/Atom\">\n\t" +
+                              "<title type=\"text\">Testing</title>\n\t<!-- Testing -->\n\t" +
+                              "Trailing Text\n\t<comment-only><!-- Testing --></comment-only>\n</g1:feed>");
+        });
+      });
+    });
+
     it('can generate multiple documents', function() {
       var result = '';
 

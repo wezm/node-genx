@@ -78,7 +78,7 @@ typedef struct genxAttribute_rec * genxAttribute;
  */
 genxWriter genxNew(void * (*alloc)(void * userData, int bytes),
 		   void (* dealloc)(void * userData, void * data),
-		   void * userData);
+		   void * userData, int prettyPrint);
 
 /*
  * Dispose of a writer, freeing all associated memory

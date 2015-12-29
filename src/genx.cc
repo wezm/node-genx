@@ -15,6 +15,8 @@
 #define False 0
 #define STRLEN_XMLNS_COLON 6
 
+#define NEWLINE "\n"
+#define SPACER "\t"
 
 /*******************************
  * writer state
@@ -122,6 +124,9 @@ struct genxWriter_rec
   const char *         etext[100];
   void *       		(* alloc)(void * userData, int bytes);
   void         		(* dealloc)(void * userData, void * data);
+  unsigned int         depth;
+  Boolean              shouldNewline;
+  Boolean              prettyPrint;
 };
 
 /*******************************
@@ -510,7 +515,7 @@ static Boolean isNameChar(genxWriter w, int c)
  */
 genxWriter genxNew(void * (* alloc)(void * userData, int bytes),
 		   void (* dealloc)(void * userData, void * data),
-		   void * userData)
+		   void * userData, Boolean prettyPrint)
 {
   genxWriter w;
   genxNamespace xml;
@@ -585,6 +590,10 @@ genxWriter genxNew(void * (* alloc)(void * userData, int bytes),
     return NULL;
   xml->declCount = 1;
   xml->declaration = xml->defaultDecl;
+
+  w->depth = 0;
+  w->shouldNewline = 0;
+  w->prettyPrint = prettyPrint;
 
   return w;
 }
@@ -1152,6 +1161,17 @@ static genxStatus writeStartTag(genxWriter w, bool inlineTag = 0)
     unsetDefaultNamespace(w);
   w->status = GENX_SUCCESS;
 
+  if(w->prettyPrint)
+  {
+    SendCheck(w, NEWLINE);
+    for(unsigned int tabs = 0; tabs < w->depth; ++tabs)
+    {
+      SendCheck(w, SPACER);
+    }
+    w->depth++;
+    w->shouldNewline = 0;
+  }
+
   SendCheck(w, "<");
   if (e->ns && (e->ns->declaration != w->xmlnsEquals))
   {
@@ -1538,6 +1558,20 @@ genxStatus genxEndElement(genxWriter w)
     ;
   e = (genxElement) w->stack.pointers[--i];
 
+  if(w->prettyPrint)
+  {
+    w->depth--;
+    // We only need to add a newline to closing tags that come right after other closing tags
+    if(w->shouldNewline)
+    {
+      SendCheck(w, NEWLINE);
+      for(unsigned int tabs = 0; tabs < w->depth; ++tabs)
+      {
+        SendCheck(w, SPACER);
+      }
+    }
+    w->shouldNewline = 1;
+  }
   SendCheck(w, "</");
   if (e->ns && e->ns->declaration != w->xmlnsEquals)
   {
@@ -1567,29 +1601,29 @@ genxStatus genxEndElement(genxWriter w)
        */
       if (ns->baroque)
       {
-	i = w->stack.count;
-	while (i > 0)
-	{
-	  while (w->stack.pointers[i] != NULL)
-	  {
-	    genxAttribute otherDecl = (genxAttribute) w->stack.pointers[i--];
-	    genxNamespace otherNs = (genxNamespace) w->stack.pointers[i--];
+        i = w->stack.count;
+        while (i > 0)
+        {
+          while (w->stack.pointers[i] != NULL)
+          {
+            genxAttribute otherDecl = (genxAttribute) w->stack.pointers[i--];
+            genxNamespace otherNs = (genxNamespace) w->stack.pointers[i--];
 
-	    if (otherNs == ns)
-	    {
-	      ns->declaration = otherDecl;
-	      i = 0;
-	      break;
-	    }
-	  }
+            if (otherNs == ns)
+            {
+              ns->declaration = otherDecl;
+              i = 0;
+              break;
+            }
+          }
 
-	  /* skip NULL & element */
-	  i -= 2;
-	}
+          /* skip NULL & element */
+          i -= 2;
+        }
       }
       ns->declCount--;
       if (ns->declCount == 0)
-	ns->baroque = False;
+	      ns->baroque = False;
     }
   }
 
@@ -1771,6 +1805,14 @@ genxStatus genxAddText(genxWriter w, constUtf8 start)
   if (w->sequence != SEQUENCE_CONTENT)
     return w->status = GENX_SEQUENCE_ERROR;
 
+  if(w->prettyPrint && w->shouldNewline)
+  {
+    SendCheck(w, NEWLINE);
+    for(unsigned int tabs = 0; tabs < w->depth; ++tabs)
+    {
+      SendCheck(w, SPACER);
+    }
+  }
   while (*start)
   {
     int c = genxNextUnicodeChar(&start);
@@ -1911,6 +1953,15 @@ genxStatus genxComment(genxWriter w, constUtf8 text)
   else if (w->sequence == SEQUENCE_POST_DOC)
     if ((w->status = sendx(w, (utf8) "\n")) != GENX_SUCCESS)
       return w->status;
+
+  if(w->prettyPrint && w->shouldNewline)
+  {
+    SendCheck(w, NEWLINE);
+    for(unsigned int tabs = 0; tabs < w->depth; ++tabs)
+    {
+      SendCheck(w, SPACER);
+    }
+  }
 
   if ((w->status = sendx(w, (utf8) "<!--")) != GENX_SUCCESS)
     return w->status;

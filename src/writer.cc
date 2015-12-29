@@ -87,10 +87,10 @@ void Writer::Initialize(Local<Object> exports)
   exports->Set(Nan::New("Writer").ToLocalChecked(), tpl->GetFunction());
 }
 
-Writer::Writer()
+Writer::Writer(const bool prettyPrint)
 {
   // alloc, free, userData
-  writer = genxNew(NULL, NULL, this);
+  writer = genxNew(NULL, NULL, this, prettyPrint);
   sender.send = sender_send;
   sender.sendBounded = sender_sendBounded;
   sender.flush = sender_flush;
@@ -103,7 +103,20 @@ Writer::~Writer()
 
 void Writer::New(const Nan::FunctionCallbackInfo <Value> &args)
 {
-  Writer* writer = new Writer();
+  bool prettyPrint = false;
+  switch(args.Length()) {
+    case 0: break;
+    case 1:
+      if(args[0]->IsBoolean()) {
+        prettyPrint = args[0]->ToBoolean()->Value();
+        break;
+      }
+    default:
+      Nan::ThrowTypeError("Constructor for Writer expects no arguments, or 1 argument of type Boolean");
+      return;
+  }
+
+  Writer* writer = new Writer(prettyPrint);
   writer->Wrap(args.This());
   args.GetReturnValue().Set(args.This());
 }
