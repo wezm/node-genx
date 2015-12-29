@@ -222,6 +222,7 @@ genxStatus genxUnsetDefaultNamespace(genxWriter w);
  * Write an end tag
  */
 genxStatus genxEndElement(genxWriter w);
+genxStatus genxEndElementInline(genxWriter w);
 
 /*
  * Write some text

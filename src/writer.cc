@@ -81,6 +81,7 @@ void Writer::Initialize(Local<Object> exports)
   Nan::SetPrototypeMethod(tpl, "addAttributeLiteral", AddAttributeLiteral);
 
   Nan::SetPrototypeMethod(tpl, "endElement", EndElement);
+  Nan::SetPrototypeMethod(tpl, "endElementInline", EndElementInline);
 
   constructor.Reset(tpl->GetFunction());
   exports->Set(Nan::New("Writer").ToLocalChecked(), tpl->GetFunction());
@@ -544,6 +545,22 @@ void Writer::endElement(const Nan::FunctionCallbackInfo<Value> &args)
     return;
   }
 
+  args.GetReturnValue().Set(args.This());
+}
+
+void Writer::EndElementInline(const Nan::FunctionCallbackInfo<Value> &args)
+{
+  Writer* w = ObjectWrap::Unwrap<Writer>(args.This());
+  w->endElementInline(args);
+}
+
+void Writer::endElementInline(const Nan::FunctionCallbackInfo<Value> &args)
+{
+  genxStatus status =  genxEndElementInline(writer);
+  if(status != GENX_SUCCESS) {
+    Nan::ThrowError(genxGetErrorMessage(writer, status));
+    return;
+  }
   args.GetReturnValue().Set(args.This());
 }
 
