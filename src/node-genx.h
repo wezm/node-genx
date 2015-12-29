@@ -17,47 +17,18 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef NODE_GENX_H
 #define NODE_GENX_H
 
-/*
-#define CHECK(rc) { if ((rc) != SQLITE_OK)                              \
-      return ThrowException(Exception::Error(String::New(               \
-                                             sqlite3_errmsg(*db)))); }
+#include <node_version.h>
 
-#define SCHECK(rc) { if ((rc) != SQLITE_OK)                             \
-      return ThrowException(Exception::Error(String::New(               \
-                        sqlite3_errmsg(sqlite3_db_handle(sto->stmt_))))); }
-*/
+#if NODE_MAJOR_VERSION == 0 && NODE_MINOR_VERSION <= 10
+#define GET_EXTERNAL(ISOLATE, VAL) v8::External::New(VAL)
+#else
+#define GET_EXTERNAL(ISOLATE, VAL) v8::External::New(ISOLATE, VAL)
+#endif
 
-#define REQ_ARGS(N)                                                     \
-  if (args.Length() < (N))                                              \
-    return ThrowException(Exception::TypeError(                         \
-                             String::New("Expected " #N "arguments")));
-
-#define REQ_STR_ARG(I, VAR)                                             \
-  if (args.Length() <= (I) || !args[I]->IsString())                     \
-    return ThrowException(Exception::TypeError(                         \
-                  String::New("Argument " #I " must be a string")));    \
-  String::Utf8Value VAR(args[I]->ToString());
-
-#define REQ_FUN_ARG(I, VAR)                                             \
-  if (args.Length() <= (I) || !args[I]->IsFunction())                   \
-    return ThrowException(Exception::TypeError(                         \
-                  String::New("Argument " #I " must be a function")));  \
-  Local<Function> VAR = Local<Function>::Cast(args[I]);
-
-#define REQ_EXT_ARG(I, VAR)                                             \
-  if (args.Length() <= (I) || !args[I]->IsExternal())                   \
-    return ThrowException(Exception::TypeError(                         \
-                              String::New("Argument " #I " invalid"))); \
-  Local<External> VAR = Local<External>::Cast(args[I]);
-
-#define OPT_INT_ARG(I, VAR, DEFAULT)                                    \
-  int VAR;                                                              \
-  if (args.Length() <= (I)) {                                           \
-    VAR = (DEFAULT);                                                    \
-  } else if (args[I]->IsInt32()) {                                      \
-    VAR = args[I]->Int32Value();                                        \
-  } else {                                                              \
-    return ThrowException(Exception::TypeError(                         \
-              String::New("Argument " #I " must be an integer")));      \
+#define REQ_EXT_ARG(I, ARGS)                                            \
+  if (ARGS.Length() <= (I) || ARGS[I]->IsUndefined() ||                 \
+      !ARGS[I]->IsExternal()) {                                         \
+    Nan::ThrowTypeError("Argument " #I " invalid");                     \
+    return;                                                             \
   }
 #endif

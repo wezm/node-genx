@@ -31,19 +31,36 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <node.h>
+#include <nan.h>
+
 #include "element.h"
 
-Persistent<FunctionTemplate> Element::constructor_template;
+using v8::Function;
+using v8::FunctionTemplate;
+using v8::Object;
+using v8::Handle;
+using v8::HandleScope;
+using v8::Local;
+using v8::Isolate;
+using v8::String;
+using v8::Value;
+using v8::External;
 
-void Element::Initialize(Handle<Object> target)
+Nan::Persistent<Function> Element::constructor;
+
+void Element::Initialize(Local <Object> exports)
 {
-  HandleScope scope;
+  Nan::HandleScope scope;
 
-  Local<FunctionTemplate> t = FunctionTemplate::New(New);
+  Local <FunctionTemplate> tpl = Nan::New<FunctionTemplate>(New);
 
-  constructor_template = Persistent<FunctionTemplate>::New(t);
-  constructor_template->InstanceTemplate()->SetInternalFieldCount(1);
-  constructor_template->SetClassName(String::NewSymbol("Element"));
+  tpl->SetClassName(Nan::New("Element").ToLocalChecked());
+  tpl->InstanceTemplate()->SetInternalFieldCount(1);
+
+  exports->Set(Nan::New("Element").ToLocalChecked(), tpl->GetFunction());
+
+  constructor.Reset(tpl->GetFunction());
 }
 
 Element::Element(genxElement el) : element(el)
@@ -54,14 +71,13 @@ Element::~Element()
 {
 }
 
-Handle<Value> Element::New(const Arguments& args)
+void Element::New(const Nan::FunctionCallbackInfo <Value> &args)
 {
-  HandleScope scope;
-  REQ_EXT_ARG(0, e);
+  REQ_EXT_ARG(0, args);
 
-  Element* el = new Element((genxElement)e->Value());
+  Element* el = new Element((genxElement) args[0].As<External>()->Value());
   el->Wrap(args.This());
-  return args.This();
+  args.GetReturnValue().Set(args.This());
 }
 
 genxStatus Element::start()

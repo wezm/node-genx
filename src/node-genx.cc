@@ -31,14 +31,15 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "node-genx.h"
+#include <node.h>
+
 #include "namespace.h"
 #include "attribute.h"
 #include "element.h"
 #include "writer.h"
 
 extern "C" {
-  static void init (Handle<Object> target)
+  static void init (v8::Local<v8::Object> target)
   {
     Writer::Initialize(target);
     Namespace::Initialize(target);

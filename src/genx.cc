@@ -84,7 +84,7 @@ typedef enum
 {
   ATTR_NSDECL,
   ATTR_NAKED,
-  ATTR_PREFIXED 
+  ATTR_PREFIXED
 } attrType;
 
 struct genxAttribute_rec
@@ -117,9 +117,9 @@ struct genxWriter_rec
   plist           	   elements;
   plist           	   attributes;
   plist                    prefixes;
-  plist           	   stack;   
+  plist           	   stack;
   struct genxAttribute_rec arec;
-  char *                   etext[100];
+  const char *         etext[100];
   void *       		(* alloc)(void * userData, int bytes);
   void         		(* dealloc)(void * userData, void * data);
 };
@@ -179,7 +179,7 @@ static genxStatus initCollector(genxWriter w, collector * c)
 
 static genxStatus growCollector(genxWriter w, collector * c, int size)
 {
-  utf8 newSpace; 
+  utf8 newSpace;
 
   c->space = size * 2;
   if ((newSpace = (utf8) allocate(w, c->space)) == NULL)
@@ -226,7 +226,7 @@ static genxStatus initPlist(genxWriter w, plist * pl)
   pl->pointers = (void * *) allocate(w, pl->space * sizeof(void *));
   if (pl->pointers == NULL)
     return GENX_ALLOC_FAILED;
-  
+
   return GENX_SUCCESS;
 }
 
@@ -247,7 +247,7 @@ static Boolean checkExpand(plist * pl)
     return False;
   for (i = 0; i < pl->count; i++)
     newlist[i] = pl->pointers[i];
-  deallocate(pl->writer, pl->pointers); 
+  deallocate(pl->writer, pl->pointers);
   pl->pointers = newlist;
 
   return True;
@@ -369,7 +369,7 @@ static utf8 storePrefix(genxWriter w, constUtf8 prefix, Boolean force)
     w->status = GENX_ALLOC_FAILED;
     return NULL;
   }
-  
+
   w->status = listInsert(&w->prefixes, (void *) prefix, high);
   if (w->status != GENX_SUCCESS)
     return NULL;
@@ -401,7 +401,7 @@ int genxNextUnicodeChar(constUtf8 * sp)
     goto malformed;
 
   /* 2-byte encodings, first byte c2 .. df */
-  else if (*s < 0xe0) 
+  else if (*s < 0xe0)
   {
     c = (*s++ & 0x1f) << 6;
 
@@ -760,11 +760,11 @@ static genxStatus checkNCName(genxWriter w, constUtf8 name)
   return GENX_SUCCESS;
 }
 
-char * genxGetErrorMessage(genxWriter w, genxStatus status)
+const char * genxGetErrorMessage(genxWriter w, genxStatus status)
 {
   return w->etext[status];
 }
-char * genxLastErrorMessage(genxWriter w)
+const char * genxLastErrorMessage(genxWriter w)
 {
   return w->etext[w->status];
 }
@@ -871,7 +871,7 @@ genxNamespace genxDeclareNamespace(genxWriter w, constUtf8 uri,
   if (ns->defaultDecl != NULL && defaultDecl != ns->defaultDecl)
     ns->baroque = True;
   ns->defaultDecl = defaultDecl;
-  
+
   *statusP = GENX_SUCCESS;
   return ns;
 
@@ -898,7 +898,7 @@ utf8 genxGetNamespacePrefix(genxNamespace ns)
  * DeclareElement - see genx.h for details
  */
 genxElement genxDeclareElement(genxWriter w,
-			       genxNamespace ns, constUtf8 type, 
+			       genxNamespace ns, constUtf8 type,
 			       genxStatus * statusP)
 {
   genxElement old;
@@ -934,13 +934,13 @@ genxElement genxDeclareElement(genxWriter w,
     *statusP = w->status;
     return NULL;
   }
-  
+
   *statusP = GENX_SUCCESS;
   return el;
 }
 
 /*
- * C14n ordering for attributes: 
+ * C14n ordering for attributes:
  * - first, namespace declarations by the prefix being declared
  * - second, unprefixed attributes by attr name
  * - third, prefixed attrs by ns uri then local part
@@ -1038,11 +1038,11 @@ static genxAttribute declareAttribute(genxWriter w, genxNamespace ns,
   if (valuestr)
     if ((w->status = collectString(w, &a->value, valuestr)) != GENX_SUCCESS)
       goto busted;
-  
+
   w->status = listInsert(&w->attributes, a, high);
   if (w->status != GENX_SUCCESS)
     goto busted;
-  
+
   *statusP = GENX_SUCCESS;
   return a;
 
@@ -1109,7 +1109,7 @@ genxStatus genxStartDocFile(genxWriter w, FILE * file)
 {
   if (w->sequence != SEQUENCE_NO_DOC)
     return w->status = GENX_SEQUENCE_ERROR;
-  
+
   w->sequence = SEQUENCE_PRE_DOC;
   w->file = file;
   w->sender = NULL;
@@ -1120,7 +1120,7 @@ genxStatus genxStartDocSender(genxWriter w, genxSender * sender)
 {
   if (w->sequence != SEQUENCE_NO_DOC)
     return w->status = GENX_SEQUENCE_ERROR;
-  
+
   w->sequence = SEQUENCE_PRE_DOC;
   w->file = NULL;
   w->sender = sender;
@@ -1397,7 +1397,7 @@ static genxStatus addNamespace(genxNamespace ns, utf8 prefix)
    * It's also an error if this is a default-namespace declaration and the
    *  element is in no namespace.
    */
-  e = (genxElement) w->stack.pointers[i];    
+  e = (genxElement) w->stack.pointers[i];
   if (e->ns == NULL && decl == w->xmlnsEquals)
     return w->status = GENX_BAD_DEFAULT_DECLARATION;
 
@@ -1439,23 +1439,23 @@ static genxStatus addAttribute(genxAttribute a, constUtf8 valuestr)
     while (*valuestr)
     {
       int c = genxNextUnicodeChar(&valuestr);
-      
+
       if (c == -1)
 	return w->status = GENX_BAD_UTF8;
-      
+
       if (!isXMLChar(w, c))
 	return w->status = GENX_NON_XML_CHARACTER;
-      
+
       switch(c)
       {
       case 9:
 	collectPiece(w, &a->value, "&#x9;", 5);
 	break;
       case 0xa:
-	collectPiece(w, &a->value, "&#xA;", 5); 
+	collectPiece(w, &a->value, "&#xA;", 5);
 	break;
       case 0xd:
-	collectPiece(w, &a->value, "&#xD;", 5); 
+	collectPiece(w, &a->value, "&#xD;", 5);
 	break;
       case '"':
 	collectPiece(w, &a->value, "&quot;", 6);
@@ -1574,7 +1574,7 @@ genxStatus genxEndElement(genxWriter w)
 	  {
 	    genxAttribute otherDecl = (genxAttribute) w->stack.pointers[i--];
 	    genxNamespace otherNs = (genxNamespace) w->stack.pointers[i--];
-	    
+
 	    if (otherNs == ns)
 	    {
 	      ns->declaration = otherDecl;
@@ -1582,7 +1582,7 @@ genxStatus genxEndElement(genxWriter w)
 	      break;
 	    }
 	  }
-	  
+
 	  /* skip NULL & element */
 	  i -= 2;
 	}
@@ -1769,7 +1769,7 @@ genxStatus genxAddCharacter(genxWriter w, int c)
     return w->status;
 
   return sendxBounded(w, breaker, next);
-}  
+}
 
 genxStatus genxEndDocument(genxWriter w)
 {
@@ -1922,7 +1922,7 @@ genxStatus genxAddAttributeLiteral(genxWriter w, constUtf8 xmlns,
     if (ns == NULL && w->status != GENX_SUCCESS)
       return w->status;
   }
-  
+
   a = genxDeclareAttribute(w, ns, name, &w->status);
   if (a == NULL || w->status != GENX_SUCCESS)
     return w->status;
@@ -1933,8 +1933,8 @@ genxStatus genxAddAttributeLiteral(genxWriter w, constUtf8 xmlns,
 /*
  * return version
  */
-char * genxGetVersion()
+const char * genxGetVersion()
 {
   return GENX_VERSION;
 }
- 
+

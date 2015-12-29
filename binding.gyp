@@ -10,7 +10,8 @@
         "src/attribute.cc",
         "src/writer.cc",
         "src/node-genx.cc"
-      ]
+      ],
+      "include_dirs" : [ "<!(node -e \"require('nan')\")" ]
     }
   ]
 }

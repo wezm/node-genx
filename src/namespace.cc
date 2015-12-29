@@ -31,24 +31,39 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <node.h>
+#include <nan.h>
+
 #include "namespace.h"
 
-using namespace v8;
-using namespace node;
+using v8::Function;
+using v8::FunctionTemplate;
+using v8::Object;
+using v8::Handle;
+using v8::HandleScope;
+using v8::Local;
+using v8::Isolate;
+using v8::String;
+using v8::Value;
+using v8::External;
 
-Persistent<FunctionTemplate> Namespace::constructor_template;
+using Nan::ObjectWrap;
 
-void Namespace::Initialize(Handle<Object> target)
+Nan::Persistent<Function> Namespace::constructor;
+
+void Namespace::Initialize(Local<Object> exports)
 {
-  HandleScope scope;
+  Nan::HandleScope scope;
 
-  Local<FunctionTemplate> t = FunctionTemplate::New(New);
+  Local<FunctionTemplate> tpl = Nan::New<FunctionTemplate>(New);
 
-  NODE_SET_PROTOTYPE_METHOD(t, "getPrefix", GetPrefix);
+  tpl->SetClassName(Nan::New("Namespace").ToLocalChecked());
+  tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
-  constructor_template = Persistent<FunctionTemplate>::New(t);
-  constructor_template->InstanceTemplate()->SetInternalFieldCount(1);
-  constructor_template->SetClassName(String::NewSymbol("Namespace"));
+  Nan::SetPrototypeMethod(tpl, "getPrefix", GetPrefix);
+
+  exports->Set(Nan::New("Namespace").ToLocalChecked(), tpl->GetFunction());
+  constructor.Reset(tpl->GetFunction());
 }
 
 Namespace::Namespace(genxNamespace ns) : name_space(ns)
@@ -59,19 +74,19 @@ Namespace::~Namespace()
 {
 }
 
-Handle<Value> Namespace::New(const Arguments& args)
+void Namespace::New(const Nan::FunctionCallbackInfo<Value>& args)
 {
-  HandleScope scope;
-  REQ_EXT_ARG(0, attr);
+  REQ_EXT_ARG(0, args);
 
-  Namespace* a = new Namespace((genxNamespace)attr->Value());
+  Namespace* a = new Namespace((genxNamespace) args[0].As<External>()->Value());
   a->Wrap(args.This());
-  return args.This();
+  args.GetReturnValue().Set(args.This());
 }
 
-Handle<Value> Namespace::GetPrefix(const Arguments& args)
+void Namespace::GetPrefix(const Nan::FunctionCallbackInfo<Value>& args)
 {
-  return Undefined();
+  Namespace * a = ObjectWrap::Unwrap<Namespace>(args.Holder());
+  args.GetReturnValue().Set(Nan::New((const char *) a->getPrefix()).ToLocalChecked());
 }
 
 utf8 Namespace::getPrefix()

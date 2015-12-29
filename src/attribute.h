@@ -34,25 +34,22 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef NODE_GENX_ATTRIBUTE_H
 #define NODE_GENX_ATTRIBUTE_H
 
-#include <v8.h>
 #include <node.h>
+#include <nan.h>
+
 extern "C" {
 #include "genx.h"
 }
 #include "node-genx.h"
 
-using namespace v8;
-using namespace node;
-
-class Attribute: ObjectWrap
+class Attribute : public Nan::ObjectWrap
 {
 private:
   genxAttribute attribute;
 
 public:
-  static Persistent<FunctionTemplate> constructor_template;
-
-  static void Initialize(Handle<Object> target);
+  static Nan::Persistent <v8::Function> constructor;
+  static void Initialize(v8::Local <v8::Object> exports);
 
   Attribute(genxAttribute attr);
 
@@ -61,7 +58,7 @@ public:
   genxStatus add(constUtf8 value);
 
 protected:
-  static Handle<Value> New(const Arguments& args);
+  static void New(const Nan::FunctionCallbackInfo <v8::Value> &args);
 };
 
 #endif
