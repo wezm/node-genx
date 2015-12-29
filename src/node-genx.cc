@@ -33,18 +33,20 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <node.h>
 
+#include "node-genx.h"
 #include "namespace.h"
 #include "attribute.h"
 #include "element.h"
 #include "writer.h"
 
 extern "C" {
-  static void init (v8::Local<v8::Object> target)
+  static void init (v8::Handle<v8::Object> target)
   {
-    Writer::Initialize(target);
-    Namespace::Initialize(target);
-    Attribute::Initialize(target);
-    Element::Initialize(target);
+    HANDLE_TO_LOCAL(target, localObj);
+    Writer::Initialize(localObj);
+    Namespace::Initialize(localObj);
+    Attribute::Initialize(localObj);
+    Element::Initialize(localObj);
   }
 
   NODE_MODULE(genx, init);
