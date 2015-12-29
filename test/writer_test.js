@@ -397,7 +397,8 @@ describe('genx', function(){
            .startElementLiteral('http://www.w3.org/2005/Atom', 'feed')
            .startElementLiteral('title').addAttributeLiteral('type', 'text')
            .addText('Testing').endElement().endElement().endDocument();
-          result.should.equal("<!-- Testing -->\n\n<g1:feed xmlns:g1=\"http://www.w3.org/2005/Atom\">\n\t<title type=\"text\">Testing</title>\n</g1:feed>");
+          result.should.equal("<!-- Testing -->\n<g1:feed xmlns:g1=\"http://www.w3.org/2005/Atom\">\n\t" +
+                              "<title type=\"text\">Testing</title>\n</g1:feed>");
         });
 
         it('correctly spaces trailing text nodes', function() {
@@ -416,7 +417,7 @@ describe('genx', function(){
            .addText('Trailing Text')
            .endElement()
            .endDocument();
-          result.should.equal("<!-- Testing -->\n\n<g1:feed xmlns:g1=\"http://www.w3.org/2005/Atom\">\n\t" +
+          result.should.equal("<!-- Testing -->\n<g1:feed xmlns:g1=\"http://www.w3.org/2005/Atom\">\n\t" +
                               "<title type=\"text\">Testing</title>\n\tTrailing Text\n</g1:feed>");
         });
 
@@ -439,9 +440,32 @@ describe('genx', function(){
               .endElement()
             .endElement()
             .endDocument();
-          result.should.equal("\n<g1:feed xmlns:g1=\"http://www.w3.org/2005/Atom\">\n\t" +
+          result.should.equal("<g1:feed xmlns:g1=\"http://www.w3.org/2005/Atom\">\n\t" +
                               "<title type=\"text\">Testing</title>\n\t<!-- Testing -->\n\t" +
                               "Trailing Text\n\t<comment-only><!-- Testing --></comment-only>\n</g1:feed>");
+        });
+
+        it('correctly spaces self-closing tags', function() {
+          var result = '';
+
+          w.on('data', function(data) {
+            result += data;
+          });
+
+          w.startDocument()
+           .startElementLiteral('http://www.w3.org/2005/Atom', 'feed')
+             .startElementLiteral('title').addAttributeLiteral('type', 'text')
+             .endElementInline()
+             .startElementLiteral('inline-element')
+             .endElementInline()
+             .startElementLiteral('next-element')
+               .addText('More Text')
+             .endElement()
+           .endElement()
+           .endDocument();
+          result.should.equal("<g1:feed xmlns:g1=\"http://www.w3.org/2005/Atom\">\n\t" +
+                              "<title type=\"text\" />\n\t<inline-element />\n\t" +
+                              "<next-element>More Text</next-element>\n</g1:feed>");
         });
       });
     });

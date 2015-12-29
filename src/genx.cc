@@ -127,6 +127,7 @@ struct genxWriter_rec
   unsigned int         depth;
   Boolean              shouldNewline;
   Boolean              prettyPrint;
+  Boolean              firstElementInDocument;
 };
 
 /*******************************
@@ -593,6 +594,7 @@ genxWriter genxNew(void * (* alloc)(void * userData, int bytes),
 
   w->depth = 0;
   w->shouldNewline = 0;
+  w->firstElementInDocument = 0;
   w->prettyPrint = prettyPrint;
 
   return w;
@@ -1122,6 +1124,7 @@ genxStatus genxStartDocFile(genxWriter w, FILE * file)
   w->sequence = SEQUENCE_PRE_DOC;
   w->file = file;
   w->sender = NULL;
+  w->firstElementInDocument = 0;
   return GENX_SUCCESS;
 }
 
@@ -1133,6 +1136,7 @@ genxStatus genxStartDocSender(genxWriter w, genxSender * sender)
   w->sequence = SEQUENCE_PRE_DOC;
   w->file = NULL;
   w->sender = sender;
+  w->firstElementInDocument = 0;
   return GENX_SUCCESS;
 }
 
@@ -1163,7 +1167,14 @@ static genxStatus writeStartTag(genxWriter w, bool inlineTag = 0)
 
   if(w->prettyPrint)
   {
-    SendCheck(w, NEWLINE);
+    if(!w->firstElementInDocument)
+    {
+      w->firstElementInDocument = 1;
+    }
+    else
+    {
+      SendCheck(w, NEWLINE);
+    }
     for(unsigned int tabs = 0; tabs < w->depth; ++tabs)
     {
       SendCheck(w, SPACER);
@@ -1676,6 +1687,11 @@ genxStatus genxEndElementInline(genxWriter w)
   }
   SendCheck(w, e->type);*/
   SendCheck(w, " />");
+  if(w->prettyPrint)
+  {
+    w->depth--;
+    w->shouldNewline = 1;
+  }
 
   /*
    * pop zero or more namespace declarations, then a null, then the
