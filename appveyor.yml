@@ -1,0 +1,29 @@
+branches:
+  only:
+    - develop
+
+skip_tags: true
+
+environment:
+  matrix:
+  - nodejs_version: "0.8"
+  - nodejs_version: "0.9"
+  - nodejs_version: "0.10"
+  - nodejs_version: "0.11"
+  - nodejs_version: "0.12"
+  - nodejs_version: "4"
+
+install:
+  - ps: Install-Product node $env:nodejs_version
+  - npm install
+
+platform:
+  - x86
+  - Any CPU
+
+test_script:
+  - node --version
+  - npm --version
+  - npm test
+
+build: off
