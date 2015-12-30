@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/PMLavigne/node-genx.svg)](https://travis-ci.org/PMLavigne/node-genx)
+[![Build Status](https://ci.appveyor.com/api/projects/status/nkws7r76epfnn8dx?svg=true)](https://ci.appveyor.com/project/PMLavigne/node-genx)
 node-genx
 =========
 

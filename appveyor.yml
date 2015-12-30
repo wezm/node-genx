@@ -1,17 +1,22 @@
 branches:
   only:
+    - master
     - develop
 
-skip_tags: true
+notifications:
+  - provider: Email
+    to:
+      - me@patrick.codes
+    on_build_status_changed: true
 
 environment:
   matrix:
   - nodejs_version: "0.8"
-  - nodejs_version: "0.9"
   - nodejs_version: "0.10"
-  - nodejs_version: "0.11"
   - nodejs_version: "0.12"
+  - nodejs_version: "1"
   - nodejs_version: "4"
+  - nodejs_version: "5"
 
 install:
   - ps: Install-Product node $env:nodejs_version
@@ -27,3 +32,6 @@ test_script:
   - npm test
 
 build: off
+
+matrix:
+  fast_finish: true
