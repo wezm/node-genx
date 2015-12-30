@@ -514,9 +514,7 @@ The suite is run by running `mocha` in the project root:
 
       ...................................
 
-      ✔ 35 tests complete (24ms)
-
-This version of `node-genx` has only been tested on node 0.6.x.
+      42 passing (23ms)
 
 There is also a Guardfile present that enables automatically rebuilding
 the module and running the tests when one of the source files
@@ -532,10 +530,21 @@ Contributors
 
 * Morten Siebuhr -- https://github.com/msiebuhr
   * Applied fix for node-waf configuration errors on Linux
+* Patrick Lavigne -- https://github.com/PMLavigne
+  * Rewrote project to use Nan for compatibility with node 4+
+  * Added PrettyPrint output
+  * Merged in [inline tags PR][jaydata-pr] from [jaydata][jaydata]
+
+[jaydata-pr]: https://github.com/wezm/node-genx/pull/8
+[jaydata]: https://github.com/jaydata
 
 Changelog
 ---------
 
+* 1.2.1 -- 30 Dec 2015
+  * PrettyPrint and Inline Tags
+* 1.1.0 -- 27 Dec 2015
+  * Nan rewrite for node 4+ support
 * 1.0.0 -- 17 Jan 2013
   * Update to support node 0.8.x
 * 0.9.0 -- 31 Jan 2012
