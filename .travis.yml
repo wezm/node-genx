@@ -7,7 +7,24 @@ matrix:
     - node_js: "0.8"
     - node_js: "0.10"
     - node_js: "0.12"
-    - node_js: "iojs-3"
+    - node_js: "iojs"
+      env: CXX=g++-4.8
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-4.8
+    - node_js: "iojs"
+      compiler: clang-3.6
+      env: CXX=clang-3.6
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.6
+          packages:
+            - clang-3.6
     - node_js: "4"
       env: CXX=g++-4.8
       addons:
