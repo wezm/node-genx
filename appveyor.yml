@@ -19,7 +19,7 @@ install:
 
 platform:
   - x86
-  - Any CPU
+  - x64
 
 test_script:
   - node --version
