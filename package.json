@@ -10,7 +10,28 @@
   ],
   "homepage": "http://node-genx.wezm.net/",
   "author": "Wesley Moore <wes@wezm.net> (http://www.wezm.net/)",
-  "repository": "git://github.com/wezm/node-genx.git",
+  "contributors": [
+    {
+      "name": "Patrick Lavigne",
+      "url": "https://github.com/PMLavigne",
+      "email": "me@patrick.codes"
+    },
+    {
+      "name": "Morten Siebuhr",
+      "url": "https://github.com/msiebuhr"
+    },
+    {
+      "name": "JayData",
+      "url": "https://github.com/jaydata"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wezm/node-genx"
+  },
+  "bugs": {
+    "url": "https://github.com/wezm/node-genx/issues"
+  },
   "main": "./lib/genx",
   "engines": {
     "node": ">=0.8.0"
