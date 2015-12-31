@@ -145,13 +145,17 @@ writer.startDocument().startElement(elem);
 
 ---
 
-#### new Writer([prettyPrint])
+#### new Writer([prettyPrint], [newLine], [spacer])
 
 Constructs a new Writer object.
 
 **Arguments**
 * prettyPrint (optional, boolean) -- Output human-readable / indented XML.
-  Defaults to false.
+  Defaults to `false`
+* newLine (optional, String) -- Character(s) to use as the newline character
+  when prettyPrint is enabled. Defaults to `\n`
+* spacer (optional, String) -- Character(s) to use to indent lines when
+  prettyPrint is enabled. Defaults to `\t`
 
 **Return Value**
 
@@ -160,7 +164,14 @@ Returns the created Writer
 **Example**
 
 ```node
+// No output formatting
 var writer = new genx.Writer();
+
+// PrettyPrint with the default \n newlines and \t to indent
+var writer = new genx.Writer(true);
+
+// PrettyPrint with \r\n newlines and four spaces to indent
+var writer = new genx.Writer(true, "\r\n", "    ");
 ```
 
 ---

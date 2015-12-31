@@ -15,9 +15,6 @@
 #define False 0
 #define STRLEN_XMLNS_COLON 6
 
-#define NEWLINE "\n"
-#define SPACER "\t"
-
 /*******************************
  * writer state
  */
@@ -104,30 +101,32 @@ struct genxAttribute_rec
  */
 struct genxWriter_rec
 {
-  FILE *       	  	   file;
-  genxSender *    	   sender;
-  genxStatus   	  	   status;
-  writerSequence  	   sequence;
-  char            	   xmlChars[0x10000];
-  void *          	   userData;
-  int             	   nextPrefix;
+  FILE *       	  	       file;
+  genxSender *    	       sender;
+  genxStatus   	  	       status;
+  writerSequence  	       sequence;
+  char            	       xmlChars[0x10000];
+  void *          	       userData;
+  int             	       nextPrefix;
   utf8                     empty;
   Boolean                  defaultNsDeclared;
   genxAttribute            xmlnsEquals;
   genxElement              nowStarting;
-  plist           	   namespaces;
-  plist           	   elements;
-  plist           	   attributes;
+  plist           	       namespaces;
+  plist           	       elements;
+  plist           	       attributes;
   plist                    prefixes;
-  plist           	   stack;
+  plist           	       stack;
   struct genxAttribute_rec arec;
-  const char *         etext[100];
-  void *       		(* alloc)(void * userData, int bytes);
-  void         		(* dealloc)(void * userData, void * data);
-  unsigned int         depth;
-  Boolean              shouldNewline;
-  Boolean              prettyPrint;
-  Boolean              firstElementInDocument;
+  const char *             etext[100];
+  void *       		         (* alloc)(void * userData, int bytes);
+  void         		         (* dealloc)(void * userData, void * data);
+  unsigned int             depth;
+  Boolean                  shouldNewline;
+  Boolean                  prettyPrint;
+  Boolean                  firstElementInDocument;
+  constUtf8                newLine;
+  constUtf8                spacer;
 };
 
 /*******************************
@@ -516,7 +515,7 @@ static Boolean isNameChar(genxWriter w, int c)
  */
 genxWriter genxNew(void * (* alloc)(void * userData, int bytes),
 		   void (* dealloc)(void * userData, void * data),
-		   void * userData, Boolean prettyPrint)
+		   void * userData, Boolean prettyPrint, constUtf8 newLine, constUtf8 spacer)
 {
   genxWriter w;
   genxNamespace xml;
@@ -596,6 +595,8 @@ genxWriter genxNew(void * (* alloc)(void * userData, int bytes),
   w->shouldNewline = 0;
   w->firstElementInDocument = 0;
   w->prettyPrint = prettyPrint;
+  w->newLine = newLine;
+  w->spacer = spacer;
 
   return w;
 }
@@ -1173,11 +1174,11 @@ static genxStatus writeStartTag(genxWriter w, bool inlineTag = 0)
     }
     else
     {
-      SendCheck(w, NEWLINE);
+      SendCheck(w, w->newLine);
     }
     for(unsigned int tabs = 0; tabs < w->depth; ++tabs)
     {
-      SendCheck(w, SPACER);
+      SendCheck(w, w->spacer);
     }
     w->depth++;
     w->shouldNewline = 0;
@@ -1575,10 +1576,10 @@ genxStatus genxEndElement(genxWriter w)
     // We only need to add a newline to closing tags that come right after other closing tags
     if(w->shouldNewline)
     {
-      SendCheck(w, NEWLINE);
+      SendCheck(w, w->newLine);
       for(unsigned int tabs = 0; tabs < w->depth; ++tabs)
       {
-        SendCheck(w, SPACER);
+        SendCheck(w, w->spacer);
       }
     }
     w->shouldNewline = 1;
@@ -1823,10 +1824,10 @@ genxStatus genxAddText(genxWriter w, constUtf8 start)
 
   if(w->prettyPrint && w->shouldNewline)
   {
-    SendCheck(w, NEWLINE);
+    SendCheck(w, w->newLine);
     for(unsigned int tabs = 0; tabs < w->depth; ++tabs)
     {
-      SendCheck(w, SPACER);
+      SendCheck(w, w->spacer);
     }
   }
   while (*start)
@@ -1967,15 +1968,15 @@ genxStatus genxComment(genxWriter w, constUtf8 text)
   }
 
   else if (w->sequence == SEQUENCE_POST_DOC)
-    if ((w->status = sendx(w, (utf8) "\n")) != GENX_SUCCESS)
+    if ((w->status = sendx(w, (utf8) w->newLine)) != GENX_SUCCESS)
       return w->status;
 
   if(w->prettyPrint && w->shouldNewline)
   {
-    SendCheck(w, NEWLINE);
+    SendCheck(w, w->newLine);
     for(unsigned int tabs = 0; tabs < w->depth; ++tabs)
     {
-      SendCheck(w, SPACER);
+      SendCheck(w, w->spacer);
     }
   }
 
@@ -1987,7 +1988,7 @@ genxStatus genxComment(genxWriter w, constUtf8 text)
     return w->status;
 
   if (w->sequence == SEQUENCE_PRE_DOC)
-    if ((w->status = sendx(w, (utf8) "\n")) != GENX_SUCCESS)
+    if ((w->status = sendx(w, (utf8) w->newLine)) != GENX_SUCCESS)
       return w->status;
 
   return GENX_SUCCESS;

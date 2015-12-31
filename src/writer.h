@@ -52,7 +52,7 @@ private:
 public:
   static void Initialize(v8::Local<v8::Object> target);
 
-  Writer(const bool prettyPrint);
+  Writer(const bool prettyPrint, constUtf8 newLine, constUtf8 spacer);
 
   ~Writer();
 
