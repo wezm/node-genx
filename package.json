@@ -57,6 +57,7 @@
     "should": ">=1.2.1"
   },
   "dependencies": {
+    "events": "*",
     "nan": ">=2.1.0"
   }
 }
