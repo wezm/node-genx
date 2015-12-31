@@ -50,14 +50,14 @@
     "test": "mocha"
   },
   "optionalDependencies": {
-    "node-cmake": "^1.1.0"
+    "node-cmake": "1.x"
   },
   "devDependencies": {
-    "mocha": ">=1.8.1",
-    "should": "^1.2.1"
+    "mocha": "1.8.x",
+    "should": "1.2.x"
   },
   "dependencies": {
     "events": "*",
-    "nan": "^2.1.0"
+    "nan": "2.x"
   }
 }
