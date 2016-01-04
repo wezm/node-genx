@@ -52,7 +52,7 @@ private:
 public:
   static void Initialize(v8::Local<v8::Object> target);
 
-  Writer();
+  Writer(const bool prettyPrint, constUtf8 newLine, constUtf8 spacer);
 
   ~Writer();
 
@@ -95,6 +95,9 @@ protected:
 
   static void EndElement(const Nan::FunctionCallbackInfo <v8::Value> &args);
   void endElement(const Nan::FunctionCallbackInfo<v8::Value> &args);
+
+  static void EndElementInline(const Nan::FunctionCallbackInfo<v8::Value> &args);
+  void endElementInline(const Nan::FunctionCallbackInfo<v8::Value> &args);
 
 private:
   static utf8 createUtf8FromString(v8::Handle<v8::String> String);

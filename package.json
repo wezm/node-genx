@@ -1,6 +1,6 @@
 {
   "name": "genx",
-  "version": "1.1.0",
+  "version": "1.2.2",
   "description": "Evented XML generation using the Genx C library",
   "keywords": [
     "xml",
@@ -10,7 +10,28 @@
   ],
   "homepage": "http://node-genx.wezm.net/",
   "author": "Wesley Moore <wes@wezm.net> (http://www.wezm.net/)",
-  "repository": "git://github.com/wezm/node-genx.git",
+  "contributors": [
+    {
+      "name": "Patrick Lavigne",
+      "url": "https://github.com/PMLavigne",
+      "email": "me@patrick.codes"
+    },
+    {
+      "name": "Morten Siebuhr",
+      "url": "https://github.com/msiebuhr"
+    },
+    {
+      "name": "JayData",
+      "url": "https://github.com/jaydata"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wezm/node-genx"
+  },
+  "bugs": {
+    "url": "https://github.com/wezm/node-genx/issues"
+  },
   "main": "./lib/genx",
   "engines": {
     "node": ">=0.8.0"
@@ -23,16 +44,20 @@
     }
   ],
   "scripts": {
+    "clean": "(mkdir build || rm -rf build) && mkdir -p build",
+    "cmake": "cd build && cmake .. && make -j",
+    "cmake-debug": "cd build && cmake -DCMAKE_BUILD_TYPE=Debug .. && make -j",
     "test": "mocha"
   },
   "optionalDependencies": {
-    "node-cmake": ">=1.1.0"
+    "node-cmake": "1.x"
   },
   "devDependencies": {
-    "mocha": ">=1.8.1",
-    "should": ">=1.2.1"
+    "mocha": "1.8.x",
+    "should": "1.2.x"
   },
   "dependencies": {
-    "nan": ">=2.1.0"
+    "events": "*",
+    "nan": "2.x"
   }
 }

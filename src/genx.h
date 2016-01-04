@@ -78,7 +78,7 @@ typedef struct genxAttribute_rec * genxAttribute;
  */
 genxWriter genxNew(void * (*alloc)(void * userData, int bytes),
 		   void (* dealloc)(void * userData, void * data),
-		   void * userData);
+		   void * userData, int prettyPrint, const unsigned char * newLine, const unsigned char * spacer);
 
 /*
  * Dispose of a writer, freeing all associated memory
@@ -222,6 +222,7 @@ genxStatus genxUnsetDefaultNamespace(genxWriter w);
  * Write an end tag
  */
 genxStatus genxEndElement(genxWriter w);
+genxStatus genxEndElementInline(genxWriter w);
 
 /*
  * Write some text

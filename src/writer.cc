@@ -39,6 +39,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "writer.h"
 #include "namespace.h"
 
+#define DEFAULT_NEWLINE "\n"
+#define DEFAULT_SPACER  "\t"
+
 using v8::Function;
 using v8::FunctionTemplate;
 using v8::Object;
@@ -81,15 +84,16 @@ void Writer::Initialize(Local<Object> exports)
   Nan::SetPrototypeMethod(tpl, "addAttributeLiteral", AddAttributeLiteral);
 
   Nan::SetPrototypeMethod(tpl, "endElement", EndElement);
+  Nan::SetPrototypeMethod(tpl, "endElementInline", EndElementInline);
 
   constructor.Reset(tpl->GetFunction());
   exports->Set(Nan::New("Writer").ToLocalChecked(), tpl->GetFunction());
 }
 
-Writer::Writer()
+Writer::Writer(const bool prettyPrint, constUtf8 newLine, constUtf8 spacer)
 {
   // alloc, free, userData
-  writer = genxNew(NULL, NULL, this);
+  writer = genxNew(NULL, NULL, this, prettyPrint, newLine, spacer);
   sender.send = sender_send;
   sender.sendBounded = sender_sendBounded;
   sender.flush = sender_flush;
@@ -102,7 +106,36 @@ Writer::~Writer()
 
 void Writer::New(const Nan::FunctionCallbackInfo <Value> &args)
 {
-  Writer* writer = new Writer();
+  bool prettyPrint  = false;
+  utf8 newLine = (utf8) DEFAULT_NEWLINE;
+  utf8 spacer  = (utf8) DEFAULT_SPACER;
+  switch(args.Length()) {
+    case 0: break;
+    case 3:
+      if(!args[2]->IsString()) {
+        Nan::ThrowTypeError("Third argument to Writer's constructor must be a string");
+        return;
+      }
+      spacer = createUtf8FromString(args[2]->ToString());
+    case 2:
+      if(!args[1]->IsString()) {
+        Nan::ThrowTypeError("Second argument to Writer's constructor must be a string");
+        return;
+      }
+      newLine = createUtf8FromString(args[1]->ToString());
+    case 1:
+      if(!args[0]->IsBoolean()) {
+        Nan::ThrowTypeError("First argument to Writer's constructor must be a boolean");
+        return;
+      }
+      prettyPrint = args[0]->ToBoolean()->Value();
+      break;
+    default:
+      Nan::ThrowError("Invalid number of arguments given to Writer's constructor");
+      return;
+  }
+
+  Writer* writer = new Writer(prettyPrint, newLine, spacer);
   writer->Wrap(args.This());
   args.GetReturnValue().Set(args.This());
 }
@@ -544,6 +577,22 @@ void Writer::endElement(const Nan::FunctionCallbackInfo<Value> &args)
     return;
   }
 
+  args.GetReturnValue().Set(args.This());
+}
+
+void Writer::EndElementInline(const Nan::FunctionCallbackInfo<Value> &args)
+{
+  Writer* w = ObjectWrap::Unwrap<Writer>(args.This());
+  w->endElementInline(args);
+}
+
+void Writer::endElementInline(const Nan::FunctionCallbackInfo<Value> &args)
+{
+  genxStatus status =  genxEndElementInline(writer);
+  if(status != GENX_SUCCESS) {
+    Nan::ThrowError(genxGetErrorMessage(writer, status));
+    return;
+  }
   args.GetReturnValue().Set(args.This());
 }
 
