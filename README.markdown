@@ -1,5 +1,5 @@
-[![Build Status](https://travis-ci.org/PMLavigne/node-genx.svg)](https://travis-ci.org/PMLavigne/node-genx)
-[![Build Status](https://ci.appveyor.com/api/projects/status/nkws7r76epfnn8dx?svg=true)](https://ci.appveyor.com/project/PMLavigne/node-genx)
+[![Build Status](https://travis-ci.org/wezm/node-genx.svg)](https://travis-ci.org/wezm/node-genx)
+[![Build Status](https://ci.appveyor.com/api/projects/status/ssdjt6ugn8fsq1t8?svg=true)](https://ci.appveyor.com/project/PMLavigne/node-genx-3jhvy)
 node-genx
 =========
 
@@ -553,10 +553,10 @@ Contributors
 Changelog
 ---------
 
-* 1.2.1 -- 30 Dec 2015
-  * PrettyPrint and Inline Tags
-* 1.1.0 -- 27 Dec 2015
-  * Nan rewrite for node 4+ support
+* 1.2.2 -- 04 Jan 2016
+  * "PrettyPrint" formatting
+  * Inline Tags
+  * Nan-based rewrite for node.js 4+ support
 * 1.0.0 -- 17 Jan 2013
   * Update to support node 0.8.x
 * 0.9.0 -- 31 Jan 2012
