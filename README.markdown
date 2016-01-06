@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/wezm/node-genx.svg)](https://travis-ci.org/wezm/node-genx)
 [![Build Status](https://ci.appveyor.com/api/projects/status/ssdjt6ugn8fsq1t8?svg=true)](https://ci.appveyor.com/project/PMLavigne/node-genx-3jhvy)
-node-genx
-=========
+
+# node-genx
 
 [node.js][node] bindings to the [Genx][genx] XML generation library.
 
