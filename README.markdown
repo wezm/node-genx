@@ -518,7 +518,7 @@ This project has a test suite in the `test` directory. It utilises the
     npm install -g mocha
     npm install should
 
-[mocha]: http://visionmedia.github.com/mocha/
+[mocha]: http://mochajs.org/
 
 The suite is run by running `mocha` in the project root:
 
