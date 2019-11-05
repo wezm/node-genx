@@ -53,7 +53,7 @@
     "node-cmake": "1.x"
   },
   "devDependencies": {
-    "mocha": "1.8.x",
+    "mocha": "^6.2.2",
     "should": "1.2.x"
   },
   "dependencies": {
