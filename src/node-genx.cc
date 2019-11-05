@@ -40,7 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "writer.h"
 
 extern "C" {
-  static void init (v8::Handle<v8::Object> target)
+  static void init (v8::Local<v8::Object> target)
   {
     HANDLE_TO_LOCAL(target, localObj);
     Writer::Initialize(localObj);
