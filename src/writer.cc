@@ -219,7 +219,8 @@ void Writer::declareNamespace(const Nan::FunctionCallbackInfo<Value> &args, cons
 
   Local<Value> argv[1] = { GET_EXTERNAL(args.GetIsolate(), name_space) };
   Local<Function> con  = Nan::New<Function>(Namespace::constructor);
-  args.GetReturnValue().Set(con->NewInstance(1, argv));
+
+  args.GetReturnValue().Set(Nan::NewInstance(con, 1, argv).ToLocalChecked());
 }
 
 // [namespace], elementName
@@ -277,7 +278,8 @@ void Writer::declareElement(const Nan::FunctionCallbackInfo<Value> &args, genxNa
 
   Local<Value> argv[1] = { GET_EXTERNAL(args.GetIsolate(), element) };
   Local<Function> cons = Nan::New<Function>(Element::constructor);
-  args.GetReturnValue().Set(cons->NewInstance(1, argv));
+
+  args.GetReturnValue().Set(Nan::NewInstance(cons, 1, argv).ToLocalChecked());
 }
 
 void Writer::StartElement(const Nan::FunctionCallbackInfo <Value> &args)
@@ -485,7 +487,7 @@ void Writer::declareAttribute(const Nan::FunctionCallbackInfo<Value> &args, genx
 
   Local<Value> argv[1] = {GET_EXTERNAL(args.GetIsolate(), attribute) };
   Local<Function> cons = Nan::New<Function>(Attribute::constructor);
-  args.GetReturnValue().Set(cons->NewInstance(1, argv));
+  args.GetReturnValue().Set(Nan::NewInstance(cons, 1, argv).ToLocalChecked());
 }
 
 void Writer::AddAttribute(const Nan::FunctionCallbackInfo <Value> &args)
