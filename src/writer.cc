@@ -128,7 +128,7 @@ void Writer::New(const Nan::FunctionCallbackInfo <Value> &args)
         Nan::ThrowTypeError("First argument to Writer's constructor must be a boolean");
         return;
       }
-      prettyPrint = args[0]->ToBoolean()->Value();
+      prettyPrint = Nan::To<bool>(args[0]).FromJust();
       break;
     default:
       Nan::ThrowError("Invalid number of arguments given to Writer's constructor");
@@ -251,7 +251,7 @@ void Writer::DeclareElement(const Nan::FunctionCallbackInfo <Value> &args)
         Nan::ThrowTypeError("Second argument must be a string");
         return;
       }
-      name_space = ObjectWrap::Unwrap<Namespace>(args[0]->ToObject());
+      name_space = ObjectWrap::Unwrap<Namespace>(Nan::To<v8::Object>(args[0]).ToLocalChecked());
       Text = args[1]->ToString();
       break;
     default:
@@ -295,7 +295,7 @@ void Writer::StartElement(const Nan::FunctionCallbackInfo <Value> &args)
     return;
   }
 
-  Element *e = ObjectWrap::Unwrap<Element>(args[0]->ToObject());
+  Element *e = ObjectWrap::Unwrap<Element>(Nan::To<v8::Object>(args[0]).ToLocalChecked());
 
   w->startElement(args, e);
 }
@@ -460,7 +460,7 @@ void Writer::DeclareAttribute(const Nan::FunctionCallbackInfo <Value> &args)
         Nan::ThrowTypeError("Second argument must be a string");
         return;
       }
-      name_space = ObjectWrap::Unwrap<Namespace>(args[0]->ToObject());
+      name_space = ObjectWrap::Unwrap<Namespace>(Nan::To<v8::Object>(args[0]).ToLocalChecked());
       Text = args[1]->ToString();
       break;
     default:
@@ -508,7 +508,7 @@ void Writer::AddAttribute(const Nan::FunctionCallbackInfo <Value> &args)
     return;
   }
 
-  Attribute *attr = ObjectWrap::Unwrap<Attribute>(args[0]->ToObject());
+  Attribute *attr = ObjectWrap::Unwrap<Attribute>(Nan::To<v8::Object>(args[0]).ToLocalChecked());
   Local<String> Text = args[1]->ToString();
   value = createUtf8FromString(Text);
 
