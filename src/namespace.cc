@@ -39,7 +39,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using v8::Function;
 using v8::FunctionTemplate;
 using v8::Object;
-using v8::Handle;
+using v8::Context;
 using v8::HandleScope;
 using v8::Local;
 using v8::Isolate;
@@ -62,8 +62,9 @@ void Namespace::Initialize(Local<Object> exports)
 
   Nan::SetPrototypeMethod(tpl, "getPrefix", GetPrefix);
 
-  exports->Set(Nan::New("Namespace").ToLocalChecked(), tpl->GetFunction());
-  constructor.Reset(tpl->GetFunction());
+  Local<Context> context = Nan::GetCurrentContext();
+  constructor.Reset(Nan::GetFunction(tpl).ToLocalChecked());
+  Nan::Set(exports, Nan::New("Namespace").ToLocalChecked(), tpl->GetFunction(context).ToLocalChecked());
 }
 
 Namespace::Namespace(genxNamespace ns) : name_space(ns)

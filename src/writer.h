@@ -100,9 +100,9 @@ protected:
   void endElementInline(const Nan::FunctionCallbackInfo<v8::Value> &args);
 
 private:
-  static utf8 createUtf8FromString(v8::Handle<v8::String> String);
+  static utf8 createUtf8FromString(v8::Local<v8::String> String);
 
-  void Emit(int argc, v8::Handle<v8::Value>argv[]);
+  void Emit(int argc, v8::Local<v8::Value>argv[]);
   static genxStatus sender_send(void *userData, constUtf8 s);
   static genxStatus sender_sendBounded(void *userData, constUtf8 start, constUtf8 end);
   static genxStatus sender_flush(void * userData);

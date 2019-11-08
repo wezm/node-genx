@@ -45,7 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using v8::Function;
 using v8::FunctionTemplate;
 using v8::Object;
-using v8::Handle;
+using v8::Context;
 using v8::HandleScope;
 using v8::Local;
 using v8::Isolate;
@@ -86,8 +86,9 @@ void Writer::Initialize(Local<Object> exports)
   Nan::SetPrototypeMethod(tpl, "endElement", EndElement);
   Nan::SetPrototypeMethod(tpl, "endElementInline", EndElementInline);
 
-  constructor.Reset(tpl->GetFunction());
-  exports->Set(Nan::New("Writer").ToLocalChecked(), tpl->GetFunction());
+  Local<Context> context = Nan::GetCurrentContext();
+  constructor.Reset(Nan::GetFunction(tpl).ToLocalChecked());
+  Nan::Set(exports, Nan::New("Writer").ToLocalChecked(), tpl->GetFunction(context).ToLocalChecked());
 }
 
 Writer::Writer(const bool prettyPrint, constUtf8 newLine, constUtf8 spacer)
@@ -116,19 +117,19 @@ void Writer::New(const Nan::FunctionCallbackInfo <Value> &args)
         Nan::ThrowTypeError("Third argument to Writer's constructor must be a string");
         return;
       }
-      spacer = createUtf8FromString(args[2]->ToString());
+      spacer = createUtf8FromString(Nan::To<String>(args[2]).ToLocalChecked());
     case 2:
       if(!args[1]->IsString()) {
         Nan::ThrowTypeError("Second argument to Writer's constructor must be a string");
         return;
       }
-      newLine = createUtf8FromString(args[1]->ToString());
+      newLine = createUtf8FromString(Nan::To<String>(args[1]).ToLocalChecked());
     case 1:
       if(!args[0]->IsBoolean()) {
         Nan::ThrowTypeError("First argument to Writer's constructor must be a boolean");
         return;
       }
-      prettyPrint = args[0]->ToBoolean()->Value();
+      prettyPrint = Nan::To<bool>(args[0]).FromJust();
       break;
     default:
       Nan::ThrowError("Invalid number of arguments given to Writer's constructor");
@@ -181,7 +182,7 @@ void Writer::DeclareNamespace(const Nan::FunctionCallbackInfo <Value> &args)
         Nan::ThrowTypeError("First argument to declareNamespace must be a string");
         return;
       }
-      Uri = args[0]->ToString();
+      Uri = Nan::To<String>(args[0]).ToLocalChecked();
       break;
     case 2:
       if (!args[0]->IsString()) {
@@ -192,8 +193,8 @@ void Writer::DeclareNamespace(const Nan::FunctionCallbackInfo <Value> &args)
         Nan::ThrowTypeError("Second argument to declareNamespace must be a string");
         return;
       }
-      Uri = args[0]->ToString();
-      Prefix = args[1]->ToString();
+      Uri = Nan::To<String>(args[0]).ToLocalChecked();
+      Prefix = Nan::To<String>(args[1]).ToLocalChecked();
       prefix = createUtf8FromString(Prefix);
       break;
     default:
@@ -219,7 +220,8 @@ void Writer::declareNamespace(const Nan::FunctionCallbackInfo<Value> &args, cons
 
   Local<Value> argv[1] = { GET_EXTERNAL(args.GetIsolate(), name_space) };
   Local<Function> con  = Nan::New<Function>(Namespace::constructor);
-  args.GetReturnValue().Set(con->NewInstance(1, argv));
+
+  args.GetReturnValue().Set(Nan::NewInstance(con, 1, argv).ToLocalChecked());
 }
 
 // [namespace], elementName
@@ -239,7 +241,7 @@ void Writer::DeclareElement(const Nan::FunctionCallbackInfo <Value> &args)
         Nan::ThrowTypeError("First argument must be a string");
         return;
       }
-      Text = args[0]->ToString();
+      Text = Nan::To<String>(args[0]).ToLocalChecked();
       break;
     case 2:
       if (!args[0]->IsObject()) {
@@ -250,8 +252,8 @@ void Writer::DeclareElement(const Nan::FunctionCallbackInfo <Value> &args)
         Nan::ThrowTypeError("Second argument must be a string");
         return;
       }
-      name_space = ObjectWrap::Unwrap<Namespace>(args[0]->ToObject());
-      Text = args[1]->ToString();
+      name_space = ObjectWrap::Unwrap<Namespace>(Nan::To<v8::Object>(args[0]).ToLocalChecked());
+      Text = Nan::To<String>(args[1]).ToLocalChecked();
       break;
     default:
       Nan::ThrowError("Wrong number of arguments to declareElement");
@@ -277,7 +279,8 @@ void Writer::declareElement(const Nan::FunctionCallbackInfo<Value> &args, genxNa
 
   Local<Value> argv[1] = { GET_EXTERNAL(args.GetIsolate(), element) };
   Local<Function> cons = Nan::New<Function>(Element::constructor);
-  args.GetReturnValue().Set(cons->NewInstance(1, argv));
+
+  args.GetReturnValue().Set(Nan::NewInstance(cons, 1, argv).ToLocalChecked());
 }
 
 void Writer::StartElement(const Nan::FunctionCallbackInfo <Value> &args)
@@ -293,7 +296,7 @@ void Writer::StartElement(const Nan::FunctionCallbackInfo <Value> &args)
     return;
   }
 
-  Element *e = ObjectWrap::Unwrap<Element>(args[0]->ToObject());
+  Element *e = ObjectWrap::Unwrap<Element>(Nan::To<v8::Object>(args[0]).ToLocalChecked());
 
   w->startElement(args, e);
 }
@@ -327,7 +330,7 @@ void Writer::StartElementLiteral(const Nan::FunctionCallbackInfo <Value> &args)
         Nan::ThrowTypeError("First argument must be a string");
         return;
       }
-      Type = args[0]->ToString();
+      Type = Nan::To<String>(args[0]).ToLocalChecked();
       break;
     case 2:
       if (!args[0]->IsString()) {
@@ -338,9 +341,9 @@ void Writer::StartElementLiteral(const Nan::FunctionCallbackInfo <Value> &args)
         Nan::ThrowTypeError("Second argument must be a string");
         return;
       }
-      Namespace = args[0]->ToString();
+      Namespace = Nan::To<String>(args[0]).ToLocalChecked();
       name_space = createUtf8FromString(Namespace);
-      Type = args[1]->ToString();
+      Type = Nan::To<String>(args[1]).ToLocalChecked();
       break;
     default:
       Nan::ThrowError("Wrong number of arguments to startElementLiteral");
@@ -378,7 +381,7 @@ void Writer::AddText(const Nan::FunctionCallbackInfo <Value> &args)
     return;
   }
 
-  Local<String> Text = args[0]->ToString();
+  Local<String> Text = Nan::To<String>(args[0]).ToLocalChecked();
   text = createUtf8FromString(Text);
 
   w->addText(args, text);
@@ -411,7 +414,7 @@ void Writer::AddComment(const Nan::FunctionCallbackInfo <Value> &args)
     return;
   }
 
-  Local<String> Text = args[0]->ToString();
+  Local<String> Text = Nan::To<String>(args[0]).ToLocalChecked();
   text = createUtf8FromString(Text);
 
   w->addComment(args, text);
@@ -447,7 +450,7 @@ void Writer::DeclareAttribute(const Nan::FunctionCallbackInfo <Value> &args)
         Nan::ThrowTypeError("First argument must be a string");
         return;
       }
-      Text = args[0]->ToString();
+      Text = Nan::To<String>(args[0]).ToLocalChecked();
       break;
     case 2:
       if (!args[0]->IsObject()) {
@@ -458,8 +461,8 @@ void Writer::DeclareAttribute(const Nan::FunctionCallbackInfo <Value> &args)
         Nan::ThrowTypeError("Second argument must be a string");
         return;
       }
-      name_space = ObjectWrap::Unwrap<Namespace>(args[0]->ToObject());
-      Text = args[1]->ToString();
+      name_space = ObjectWrap::Unwrap<Namespace>(Nan::To<v8::Object>(args[0]).ToLocalChecked());
+      Text = Nan::To<String>(args[1]).ToLocalChecked();
       break;
     default:
       Nan::ThrowError("Wrong number of arguments to declareAttribute");
@@ -485,7 +488,7 @@ void Writer::declareAttribute(const Nan::FunctionCallbackInfo<Value> &args, genx
 
   Local<Value> argv[1] = {GET_EXTERNAL(args.GetIsolate(), attribute) };
   Local<Function> cons = Nan::New<Function>(Attribute::constructor);
-  args.GetReturnValue().Set(cons->NewInstance(1, argv));
+  args.GetReturnValue().Set(Nan::NewInstance(cons, 1, argv).ToLocalChecked());
 }
 
 void Writer::AddAttribute(const Nan::FunctionCallbackInfo <Value> &args)
@@ -506,8 +509,8 @@ void Writer::AddAttribute(const Nan::FunctionCallbackInfo <Value> &args)
     return;
   }
 
-  Attribute *attr = ObjectWrap::Unwrap<Attribute>(args[0]->ToObject());
-  Local<String> Text = args[1]->ToString();
+  Attribute *attr = ObjectWrap::Unwrap<Attribute>(Nan::To<v8::Object>(args[0]).ToLocalChecked());
+  Local<String> Text = Nan::To<String>(args[1]).ToLocalChecked();
   value = createUtf8FromString(Text);
 
   w->addAttribute(args, attr, value);
@@ -537,8 +540,8 @@ void Writer::AddAttributeLiteral(const Nan::FunctionCallbackInfo <Value> &args)
     return;
   }
 
-  Local<String> Name = args[0]->ToString();
-  Local<String> Val = args[1]->ToString();
+  Local<String> Name = Nan::To<String>(args[0]).ToLocalChecked();
+  Local<String> Val = Nan::To<String>(args[1]).ToLocalChecked();
 
   // Get the raw UTF-8 strings
   name = createUtf8FromString(Name);
@@ -596,8 +599,19 @@ void Writer::endElementInline(const Nan::FunctionCallbackInfo<Value> &args)
   args.GetReturnValue().Set(args.This());
 }
 
-utf8 Writer::createUtf8FromString(Handle<String> String)
+utf8 Writer::createUtf8FromString(v8::Local<v8::String> String)
 {
+#if NODE_9_0_MODULE_VERSION < NODE_MODULE_VERSION
+  Local<Context> context = Nan::GetCurrentContext();
+  Isolate* isolate = context->GetIsolate();
+  utf8 string = NULL;
+  int length = String->Utf8Length(isolate) + 1;  // +1 for NUL character
+
+  string = new unsigned char[length];
+  String->WriteUtf8(isolate, (char *)string, length);
+
+  return string;
+#else
   utf8 string = NULL;
   int length = String->Utf8Length() + 1;  // +1 for NUL character
 
@@ -605,12 +619,13 @@ utf8 Writer::createUtf8FromString(Handle<String> String)
   String->WriteUtf8((char *)string, length);
 
   return string;
+#endif
 }
 
-void Writer::Emit(int argc, Handle<Value>argv[])
+void Writer::Emit(int argc, Local<Value>argv[])
 {
-  Local<Function> emit = Local<Function>::Cast(handle()->Get(Nan::New("emit").ToLocalChecked()));
-  emit->Call(handle(), argc, argv);
+  Local<Function> emit = Local<Function>::Cast(Nan::Get(handle(), Nan::New("emit").ToLocalChecked()).ToLocalChecked());
+  Nan::Call(emit, handle(), argc, argv);
 }
 
 genxStatus Writer::sender_send(void *userData, constUtf8 s)

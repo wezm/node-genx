@@ -4,10 +4,7 @@ notifications:
     - me@patrick.codes
 matrix:
   include:
-    - node_js: "0.8"
-    - node_js: "0.10"
-    - node_js: "0.12"
-    - node_js: "iojs"
+    - node_js: "8"
       env: CXX=g++-4.8
       addons:
         apt:
@@ -15,17 +12,7 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - g++-4.8
-    - node_js: "iojs"
-      compiler: clang-3.6
-      env: CXX=clang-3.6
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.6
-          packages:
-            - clang-3.6
-    - node_js: "4"
+    - node_js: "10"
       env: CXX=g++-4.8
       addons:
         apt:
@@ -33,17 +20,7 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - g++-4.8
-    - node_js: "4"
-      compiler: clang-3.6
-      env: CXX=clang-3.6
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.6
-          packages:
-            - clang-3.6
-    - node_js: "5"
+    - node_js: "12"
       env: CXX=g++-4.8
       addons:
         apt:
@@ -51,7 +28,15 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - g++-4.8
-    - node_js: "5"
+    - node_js: "13"
+      env: CXX=g++-4.8
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-4.8
+    - node_js: "13"
       compiler: clang-3.6
       env: CXX=clang-3.6
       addons:
